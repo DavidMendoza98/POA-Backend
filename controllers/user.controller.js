@@ -8,99 +8,7 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer")
 
 
-// controlador para el inicio de sesion
-const login = async (req, res) => {
-  //return res.status(200);
-  try {
-    // obtener usuario de la bd
-    const user = await User.findOne({
-      where: {
-        username: req.body.username,
-        isDelete: false
-      },
-      include: [{
-        model: db.role,
-      }, {
-        model: db.empleado, include:[{
-            model:db.ue, include:[{
-                model:db.institucion
-              }]
-          }]
-      }]
-    });
 
-    // 404 si no hay usuario con el id proporcionado
-    if (!user) {
-      return res.status(404).send({
-        message: "User Not found."
-      });
-    }
-     
-    // bloque de codigo para obtener la lista de permisos
-    const id_permisos = await db.roles_permiso.findAll({
-      where: {
-        idRol: user.role.id
-      }
-    })
-    const permisos = []
-    for (let i = 0; i < id_permisos.length; i++) {
-      const permiso_individual = await db.permiso.findOne({ where: { id: id_permisos[i].idPermiso } });
-      permisos.push(permiso_individual.Permiso);
-    }
-    // bloque de codigo para obtener la lista de departamentos
-    const id_deptos = await db.empleado_depto.findAll({
-      where: {
-        idEmpleado: user.empleado.id
-      }
-    })
-    const deptos = []
-    for (let i = 0; i < id_deptos.length; i++) {
-      deptos.push(await db.depto.findOne({ where: { id: id_deptos[i].idDepto } }));
-      
-    }
-    
-    // validar contrase;a
-    const passwordIsValid = bcrypt.compareSync(
-      req.body.password,
-      user.password
-    );
-    
-    // error al no coincidir contrase;a
-    if (!passwordIsValid) {
-      return res.status(401).send({
-        message: "Warning! Invalid Password!",
-      });
-    }
-    // jwt no incluido todavia
-    const token = jwt.sign({
-      idUsuario: user.id,
-      idEmpleado: user.empleado.id,
-      idUE: user.empleado.idUnidadEjecutora
-    },
-
-      config.secret, {
-      expiresIn: 86400, // 24 horas de ducración de tokens
-    });
-
-    const resp = {
-      id: user.id,
-      usuario: user.username,
-      empleado: user.empleado,
-      rol: user.role,//,
-      permisos:permisos,
-      departamentos:deptos,
-      //sesion:ses,
-      token: token
-    }
-    return res.status(200).send(resp);
-  } catch (error) {
-    console.log(error);
-    return res.status(500).send({
-      message: error.message
-    });
-  }
-
-};
 
 // controlador para crear un usuario
 const newUser = async(req,res) => { 
@@ -132,30 +40,7 @@ const newUser = async(req,res) => {
     }
    };
 
-// Controlador para la validacion de username
-const userValidation = async (req, res) => {
-  try {
 
-    const user = await db.user.findOne({
-      where: {
-        username: req.body.username
-      },
-    });
-
-    if (!user) {
-      return res.status(404).send({
-        message: "usuario no existe"
-      });
-    }
-
-    return res.status(200).send({ user });
-
-  } catch (error) {
-    return res.status(500).send({
-      message: error.message
-    });
-  }
-};
 
 // controlador para obtener todos los usuarios
 const allUser = async (req, res) => {
@@ -445,9 +330,7 @@ const newPassword = async (req, res) => {
   };
 module.exports = {
   allUser,
-  login,
   newUser,
-  userValidation,
   get_rol_by_username,
   getUserById,
   update_user,

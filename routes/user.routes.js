@@ -10,7 +10,6 @@ module.exports = function(app) {
     );
     next();
   })
-  app.post("/auth/login",controller.login);
   app.get("/auth/get-all",controller.allUser);
   app.get("/auth/delete-user/:id",controller.deleteUser);
   app.post("/auth/create-user",controller.newUser);

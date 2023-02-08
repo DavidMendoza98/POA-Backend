@@ -1,22 +1,24 @@
 module.exports = (sequelize, Sequelize) => {
     const Sesion = sequelize.define("Sesion", {
+      fecha:{
+        type: Sequelize.DATE,
+        allowNull: false,
+        defaultValue: Sequelize.NOW
+      },
       token: {
-        type: Sequelize.STRING,
-        allowNull: false // no permite valores nulos
-      },
-      FechaInicio: {
-        type: Sequelize.STRING,
-        allowNull: false // no permite valores nulos
-      },
-      FechaFin: {
-        type: Sequelize.STRING,
-        allowNull: false // no permite valores nulos 
+        type: Sequelize.TEXT,
+        allowNull: false 
       },
       isDelete: {
         type: Sequelize.BOOLEAN,
-        allowNull: false, // no permite valores nulos
-        defaultValue: false // establece el valor por defecto en false
-      }
+        allowNull: false,
+        defaultValue: false
+      },
+      isActive: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: true
+      },
     });
     return Sesion;
   };
