@@ -67,6 +67,8 @@ require("./routes/indicadoresPOA.routes")(app);
 require("./routes/revision.routes")(app)
 require("./routes/ue_presupuesto.routes")(app)
 
+require('./routes/medioVerificacion.routes')(app)
+
 app.use(
   cookieSession({
     name: "poa-session",
