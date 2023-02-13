@@ -75,6 +75,8 @@ db.fuentePoa = require("./fuentePoa.model.js")(sequelize,Sequelize);
 db.seguimiento = require("./seguimiento.model.js")(sequelize,Sequelize);
 db.medioVerificacion = require("./medioVerificacion.model.js")(sequelize,Sequelize);
 
+db.sesion = require("../models/sesion.model")(sequelize, Sequelize);
+
 ///////////////////////////////index.user.js//////////////////////////////
 /////// RELACIÓN DE UNO A UNO /////////
 //// UN USUARIO PERTENECE A UN EMPLEADO, UN EMPLEADO TIENE UN USUARIO ////
@@ -106,6 +108,13 @@ db.pei.hasMany(db.dimension, {
 });
 db.dimension.belongsTo(db.pei, {
   foreignKey: { name: 'idPei', allowNull: false }
+});
+
+db.user.hasMany(db.sesion, {
+  foreignKey: { name: 'idUsuario', allowNull: false }
+});
+db.sesion.belongsTo(db.user, {
+  foreignKey: { name: 'idUsuario', allowNull: false }
 });
 
 /////// RELACIÓN DE UNO A MUCHOS /////////
