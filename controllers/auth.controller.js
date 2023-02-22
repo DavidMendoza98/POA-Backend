@@ -104,21 +104,65 @@ const login = async (req, res) => {
 
 const logout = async (req,res) => {
     try{
+        if(!req.body.token){
+            return res.status(403).send({message:'Error debe enviar el token de sesion'})
+        }
+        const sesion = await db.sesion.findOne({
+                where: {
+                    token: req.body.token,
+                    isDelete: false
+                }
+            }
+        );
+
+        if(!sesion){
+            return res.status(401).send({message:'Token invalido'});
+        }
+        const sesionUpdate = await db.sesion.update(
+            {
+                isActive :false
+            },
+            {
+                where:{
+                    token : sesion.token
+                }
+            }
+        )
+        return res.status(200).send(sesionUpdate);
 
     }catch(error){
-
+        return res.status(500).send({error:error});
     }
 }
 
 // Controlador para la validacion de username
 const checkSesion = async (req, res) => {
-    let token = req.body.token;
-
-    if (!token) {
+    if (!req.body.token) {
         return res.status(403).send({
-            message: "No token provided!",
+            message: "Error debe enviar el token de sesion!",
         });
     }
+    const sesion = await db.sesion.findOne({
+            where: {
+                token: req.body.token,
+                isDelete: false
+            }
+        }
+    );
+
+    if(!sesion){
+        return res.status(401).send({message:'Token invalido'});
+    }
+    
+    const decodedToken = jwt.decode(sesion.token);
+    const dateNow = new Date();
+
+    if(decodedToken.exp < dateNow.getTime()){
+        return res.status(401).send({message:"expired"});
+    }
+    return res.status(200).send({message:"valid"});
+
+    
 
     
 };

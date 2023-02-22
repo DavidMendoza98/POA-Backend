@@ -10,4 +10,6 @@ module.exports = function(app) {
     next();
   })
   app.post("/auth/login",controller.login);
+  app.post("/auth/logout",controller.logout);
+  app.post("/auth/check",controller.checkSesion);
 };
