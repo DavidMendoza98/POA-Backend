@@ -43,20 +43,24 @@ const get_empleado_by_id = async (req,res) =>{
 }
 const get_empleados = async (req,res) =>{
     try{
-        const empleados = await db.empleado.findAll({
-            where: {
-                isDelete: false,
-              },
-              include: [{
-                model: db.ue,
-              }]
-        });
+        const empleados_deptos = await db.empleado_depto.findAll({
+            where:{
+                idDepto : req.params.idDepto
+            }
+        })
+
+        const id_empleados = empleados_deptos.map( objeto => objeto.idEmpleado);
+        empleados = []
+        for (let index = 0; index < id_empleados.length; index++) {
+            empleados.push(await db.empleado.findByPk(id_empleados[index]));
+            
+        }
         if(!empleados){
             return res.status(400).send("<h1>No existe ni un empleado</h1>");
         }
         return res.status(200).json(empleados);
     }catch(error){
-        return res.status(400).json({status:"Bad Request", error:error});
+        return res.status(500).json({status:"Server Error ", error:error});
     }
 }
 

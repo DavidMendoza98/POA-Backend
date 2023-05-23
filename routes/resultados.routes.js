@@ -19,6 +19,7 @@ module.exports = function(app) {
   app.put("/resultados/updateResultado",controller.updateResultado);
   app.get("/resultados/getResult/:id",controller.get_Result);
   app.get("/resultados/getResultado_by_idPei/:idPei",controller.AllResultado_by_idPei);
+  app.get("/resultados/getResultado_by_idDimension/:idDimension",controller.AllResultado_by_idDimension);
   
 
 };

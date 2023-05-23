@@ -68,7 +68,58 @@ const delete_ue_presupuesto  = async (req, res) => {
         return res.status(500).send({message:'Error en el server : ' + e});
     }
 }
+const set_habilitado  = async (req, res) => {
+    try{
+        const ue_presupuesto = await db.ue_presupuesto.findOne({
+            where:{
+                id:req.body.id
+            }
+        })
 
+        if(!ue_presupuesto){ return res.status(404).send({message:'Error, elemento no encontrado'})};
+
+        await db.ue_presupuesto.update({
+            isActive:true
+        }, {
+            where:{
+                id: ue_presupuesto.id
+            }
+        })
+        return res.status(200).send({message:'Habilitado con éxito'});
+    }catch(e){
+        return res.status(500).send({message:'Error en el server : ' + e});
+    }
+}
+const set_prederminado  = async (req, res) => {
+    try{
+        const ue_presupuesto = await db.ue_presupuesto.findOne({
+            where:{
+                id:req.body.id
+            }
+        })
+
+        if(!ue_presupuesto){ return res.status(404).send({message:'Error, elemento no encontrado'})};
+
+        await db.ue_presupuesto.update({
+            esPrederminado:false
+        }, {
+            where:{
+                idUE: req.body.idUE
+            }
+        })
+
+        await db.ue_presupuesto.update({
+            esPrederminado:true
+        }, {
+            where:{
+                id: ue_presupuesto.id
+            }
+        })
+        return res.status(200).send({message:'Predeterminado con éxito'});
+    }catch(e){
+        return res.status(500).send({message:'Error en el server : ' + e});
+    }
+}
 const get_all_ue_presupuesto  = async (req, res) => {
     try{
         const all_ue_presupuesto = await db.ue_presupuesto.findAll({
@@ -88,6 +139,9 @@ const get_one_ue_presupuesto  = async (req, res) => {
                 id:req.params.id
             }
         })
+        if(!ue_presupuesto){
+            return res.status(404).send(ue_presupuesto);
+        }
         return res.status(200).send(ue_presupuesto);
     } catch(e){
         return res.status(500).send({message:'Error en el server : ' + e});
@@ -99,22 +153,28 @@ const get_status_ue_presupuesto  = async (req, res) => {
         let fuente12 = 0;
         let fuente12B = 0;
 
-        const poas = await db.poa.findAll({
+        const poa = await db.poa.findOne({
             where:{
                 idUE:req.params.idUnidadEjecutora,
                 anio:req.params.anio
             }
         })
-        const presupuesto = await db.ue_presupuesto.findOne(
-            {where:{
-                idUnidadEjecutora : req.params.idUnidadEjecutora,
-                anio:req.params.anio
-            }}
-        )
-        for (let i = 0; i < poas.length; i++) {
-                fuente11 += parseFloat(poas[i].fuente11);
-                fuente12 += parseFloat(poas[i].fuente12);
-                fuente12B+= parseFloat(poas[i].fuente12B);
+        if(!poa){
+            return res.status(404).send({message:'Poa unidad ejecutora no encontrado'});
+        }
+        const poa_deptos = await db.poa_depto.findAll({
+            idPoaUE:req.params.idUnidadEjecutora
+        })
+        // const presupuesto = await db.ue_presupuesto.findOne(
+        //     {where:{
+        //         idUnidadEjecutora : req.params.idUnidadEjecutora,
+        //         anio:req.params.anio
+        //     }}
+        // )
+        for (let i = 0; i < poa_deptos.length; i++) {
+                fuente11 += parseFloat(poa_deptos[i].fuente11);
+                fuente12 += parseFloat(poa_deptos[i].fuente12);
+                fuente12B+= parseFloat(poa_deptos[i].fuente12B);
 
           }
           return res.status(200).send(
@@ -122,12 +182,12 @@ const get_status_ue_presupuesto  = async (req, res) => {
             fuente11,
             fuente12,
             fuente12B,
-            fuente11_base:parseFloat(presupuesto.fuente11),
-            fuente12_base:parseFloat(presupuesto.fuente12),
-            fuente12B_base:parseFloat(presupuesto.fuente12B),
-            fuente11_restante:parseFloat(presupuesto.fuente11) - fuente11,
-            fuente12_restante:parseFloat(presupuesto.fuente12) - fuente12,
-            fuente12B_restante:parseFloat(presupuesto.fuente12B) - fuente12B
+            fuente11_base:parseFloat(poa.fuente11),
+            fuente12_base:parseFloat(poa.fuente12),
+            fuente12B_base:parseFloat(poa.fuente12B),
+            fuente11_restante:parseFloat(poa.fuente11) - fuente11,
+            fuente12_restante:parseFloat(poa.fuente12) - fuente12,
+            fuente12B_restante:parseFloat(poa.fuente12B) - fuente12B
           }
           );
     } catch(e){
@@ -137,18 +197,26 @@ const get_status_ue_presupuesto  = async (req, res) => {
 
 const get_status_depto = async (req, res) => {
     try{
-        const Poa = await db.poa.findOne({
+        const Poa_Ue = await db.poa.findOne({
             where:{
                 idUE:req.body.idUnidadEjecutora,
-                idDepto:req.body.idDepto,
                 anio:req.body.anio
             }
         })
-        if(!Poa){
-            return res.status(200).send({res:false});
+        if(!Poa_Ue){
+            return res.status(404).send({message:'no existe poa para esa Ue en ese año'});
+        }
+        const Poa_depto = await db.poa_depto.findOne({
+            where:{
+                idPoaUE:Poa_Ue.id,
+                idDepto:req.body.idDepto
+            }
+        })
+        if(!Poa_depto){
+            return res.status(404).send({message:'no existe poa para ese departamento en ese año para esa ue'});
         }
         return res.status(200).send({res:true,
-        poa:Poa});
+        poa:Poa_depto});
 
     }catch(e){
         return res.status(500).send({message:'Error en el server : ' + e});
@@ -162,5 +230,7 @@ module.exports = {
     get_all_ue_presupuesto,
     get_one_ue_presupuesto,
     get_status_ue_presupuesto,
-    get_status_depto
+    get_status_depto,
+    set_habilitado,
+    set_prederminado
 }

@@ -12,33 +12,41 @@ const newActividad = async (req, res) => {
         if (actividad) {
             return res.status(400).json({ message: 'Nombre de Actividad ya utilizado' });
         }
-        const poa = await db.poa.findOne({ where: { id: req.body.idPoa } })
+        
+        const poaDepto = await db.poa_depto.findOne({ where: { id: req.body.idPoaDepto } })
+        
+        if (!poaDepto) {
+            return res.status(404).json({ message: 'poa del departamento incorrecto' });
+        }
+        const poa = await db.poa.findOne({ where: { id: poaDepto.idPoaUE} })
         if (!poa) {
             return res.status(404).json({ message: 'poa incorrecto' });
         }
-        const pei = await db.poa.findOne({ where: { id: req.body.idPoa } })
-        if (!poa) {
-            return res.status(404).json({ message: 'poa incorrecto' });
-        }
+        
         const actividadCreada = await db.actividad.create({
             nombre: req.body.nombre,
             descripcion: req.body.descripcion,
+            resultadoActividad:req.body.resultadoActividad,
             estado: "FORMULACION",
             tipoActividad: req.body.tipoActividad,
             categoria: req.body.categoria,
-            idPoa: req.body.idPoa,
-            idDepto: poa.idDepto,
+            idPoa: poa.id,
+            idPoaDepto: poaDepto.id,
+            idDepto:poaDepto.idDepto,
             idInstitucion: poa.idInstitucion,
             idUE: poa.idUE,
             idResultado:req.body.idResultado
         });
-
-        for (let i = 0; i < req.body.responsables.length; i++) {
-            await db.ACencargados.create({
-                idActividad: actividadCreada.id,
-                idEmpleado: req.body.responsables[i]
-            });
-        }
+        await db.ACencargados.create({
+               idActividad: actividadCreada.id,
+               idEmpleado: req.body.responsables
+        });
+        // for (let i = 0; i < req.body.responsables.length; i++) {
+        //     await db.ACencargados.create({
+        //         idActividad: actividadCreada.id,
+        //         idEmpleado: req.body.responsables[i]
+        //     });
+        // }
         return res.status(200).json({ status: "Ok" });
     } catch (error) {
         return res.status(500).json({ status: "Server Error: " + error });
@@ -83,23 +91,37 @@ const updateActividad = async (req, res) => {
             return res.status(400).json({ message: 'Debe enviar todos los datos' });
         }
       
+        if (!req.body.resultadoActividad) {
+            return res.status(400).json({ message: 'Debe enviar todos los datos' });
+        }
         if (!req.body.tipoActividad) {
             return res.status(400).json({ message: 'Debe enviar todos los datos' });
         }
         if (!req.body.categoria) {
             return res.status(400).json({ message: 'Debe enviar todos los datos' });
         }
-        const poa = await db.poa.findOne({ where: { id: req.body.idPoa } })
-        if (!poa) {
-            return res.status(404).json({ message: 'resultado incorrecto' });
+        const poaDepto = await db.poa_depto.findOne({ where: { id: req.body.idPoaDepto } })
+        
+        if (!poaDepto) {
+            return res.status(404).json({ message: 'poa del departamento incorrecto' });
         }
+        const poa = await db.poa.findOne({ where: { id: poaDepto.idPoaUE} })
+        if (!poa) {
+            return res.status(404).json({ message: 'poa incorrecto' });
+        }
+        
         const temporally = await db.actividad.update(
             {
                 nombre: req.body.nombre,
                 descripcion: req.body.descripcion,
+                resultadoActividad:req.body.resultadoActividad,
                 tipoActividad: req.body.tipoActividad,
                 categoria: req.body.categoria,
-                idPoa: req.body.idPoa,
+                idPoa: poa.id,
+                idPoaDepto: poaDepto.id,
+                idDepto:poaDepto.idDepto,
+                idInstitucion: poa.idInstitucion,
+                idUE: poa.idUE,
                 idResultado:req.body.idResultado
             },
             { where: { id: req.body.id } });
@@ -161,7 +183,7 @@ const get_all_actividad_by_idPoa = async (req, res) => {
             {
                 where: {
                     isDelete: false,
-                    idPoa: req.params.idPoa
+                    idPoaDepto: req.params.idPoa
                 },
                 include: [{
                     model: db.poa
@@ -195,6 +217,33 @@ const probando_like = async(req,res) => {
 }
 };
 
+const setEstadoDeActividad = async (req, res) => {
+    try {
+        if (!req.body.id) {
+            return res.status(400).json({ message: 'Debe enviar todos los datos' });
+        }
+        if (!req.body.estado) {
+            return res.status(400).json({ message: 'Debe enviar todos los datos' });
+        }
+        
+        const temporally = await db.actividad.update(
+            {
+                estado: req.body.estado
+            },
+            { where: { id: req.body.id } });
+
+        if (temporally) {
+            res.status(200).send({
+                message: "Actividad actualizada con exito",
+                actividad: temporally
+            });
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ status: "Server Error: " + error });
+    }
+}
+
 module.exports = {
     newActividad,
     get_all_actividad_by_idPoa,
@@ -202,5 +251,6 @@ module.exports = {
     updateActividad,
     delete_actividad,
     get_all_actividades,
-    probando_like
+    probando_like,
+    setEstadoDeActividad
 }

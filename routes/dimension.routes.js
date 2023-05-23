@@ -15,4 +15,5 @@ module.exports = function(app) {
   app.put("/dimension/update",controller.update_dimension);
   app.post("/dimension/create",controller.new_dimension);
   app.get("/dimension/get_all_by_id_pei/:idPei", controller.get_all_dimension_by_idPei);
+  app.get("/dimension/get_all_by_id_peiSegunRequest", controller.get_all_dimension_by_idPeiSegunRequest);
 };

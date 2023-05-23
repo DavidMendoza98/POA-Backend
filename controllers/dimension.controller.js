@@ -48,14 +48,44 @@ const get_all_dimension = async (req,res) =>{
 
 const get_all_dimension_by_idPei = async (req,res) =>{
     try{
-        const all_dimension = await db.dimension.findAll(
-           { where:{isDelete:false,
-                    idPei : req.params.idPei},
-                    include:[{
-                        model:db.pei,
-                      }],order:[[
-                        'createdAt','DESC']]
-                      })
+        
+            all_dimension = await db.dimension.findAll(
+                { where:{isDelete:false,
+                            idPei : req.params.idPei},
+                            include:[{
+                                model:db.pei,
+                            }],order:[[
+                                'createdAt','DESC']]
+                            })
+        if(!all_dimension){
+            return res.status(404).send({message:'no hay ningun elemento'});
+        }
+        return res.status(200).json(all_dimension);
+    }catch(error){
+        return res.status(500).json({status:"Server Error: " + error});
+    }
+}
+const get_all_dimension_by_idPeiSegunRequest = async (req,res) =>{
+    try{
+        
+            const empleado = await db.empleado.findOne(
+                {
+                    where : {
+                        id:req.usuario.idEmpleado},
+                    include : [model=db.ue]
+                } 
+            )
+
+            const pei = await db.pei.findOne({where:{idInstitucion:empleado.ejecutora.idInstitucion, isActive:1}})
+            all_dimension = await db.dimension.findAll(
+            { where:{isDelete:false,
+                        idPei : pei.id},
+                        include:[{
+                            model:db.pei,
+                        }],order:[[
+                            'createdAt','DESC']]
+                        })
+        
         if(!all_dimension){
             return res.status(404).send({message:'no hay ningun elemento'});
         }
@@ -120,5 +150,6 @@ module.exports = {
     disable_dimension,
     update_dimension,
     get_dimension,
-    get_all_dimension_by_idPei
+    get_all_dimension_by_idPei,
+    get_all_dimension_by_idPeiSegunRequest
   }

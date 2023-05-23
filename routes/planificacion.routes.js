@@ -6,7 +6,7 @@ module.exports = function (app) {
     next();
   });
 
-  app.get("/planificacion/get_all", controller.get_all_Planificacion);
+  app.get("/planificacion/get_all/:idActividad", controller.get_all_Planificacion);
   app.get("/planificacion/get/:id", controller.get_Planificacion);
   app.put("/planificacion/delete", controller.disable_Planificacion);
   app.put("/planificacion/update", controller.update_Planificacion);

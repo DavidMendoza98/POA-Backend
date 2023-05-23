@@ -5,7 +5,8 @@ const db = require("../models");
 const new_Planificacion = async (req, res) => {
   try {
     await db.planificacion.create({
-      trimestre: req.body.trimestre,
+      idMes: req.body.idMes,
+      idIndicador: req.body.idIndicador.toString(),
       cantidad: req.body.cantidad,
       fechaInicio: req.body.fechaInicio,
       fechaFin: req.body.fechaFin,
@@ -50,15 +51,69 @@ const get_all_Planificacion = async (req, res) => {
     const all_Planificacion = await db.planificacion.findAll({
       where: {
         isDelete: false,
-      },
+        idActividad: req.params.idActividad
+      }
+      ,include: [{
+        model: db.indicadoresPoa
+      }]
     });
+
     // Valida el caso de que no existan registros de planificacion
     if (!all_Planificacion) {
       return res
         .status(404)
         .send({ message: "No hay planificaciones registradas" });
     }
-    return res.status(200).json(all_Planificacion);
+
+
+    let enero = all_Planificacion.filter(item => item.idMes === 1);
+    let febrero = all_Planificacion.filter(item => item.idMes === 2);
+    let marzo = all_Planificacion.filter(item => item.idMes === 3);
+    let abril = all_Planificacion.filter(item => item.idMes === 4);
+    let mayo = all_Planificacion.filter(item => item.idMes === 5);
+    let junio = all_Planificacion.filter(item => item.idMes === 6);
+    let julio = all_Planificacion.filter(item => item.idMes === 7);
+    let agosto = all_Planificacion.filter(item => item.idMes === 8);
+    let septiembre = all_Planificacion.filter(item => item.idMes === 9);
+    let octubre = all_Planificacion.filter(item => item.idMes === 10);
+    let noviembre = all_Planificacion.filter(item => item.idMes === 11);
+    let diciembre = all_Planificacion.filter(item => item.idMes === 12);
+
+    let has_primero = all_Planificacion.some(item => item.idMes>=1 && item.idMes <= 3 );
+    let has_segundo = all_Planificacion.some(item => item.idMes>=4 && item.idMes <= 6 );
+    let has_tercero = all_Planificacion.some(item => item.idMes>=7 && item.idMes <= 9 );
+    let has_cuarto = all_Planificacion.some(item => item.idMes>=10 && item.idMes <= 12 );
+
+    const planificacion = {
+      'primer':{
+        'enero':enero,
+        'febrero':febrero,
+        'marzo':marzo
+      },
+      'segundo':{
+        'abril':abril,
+        'mayo':mayo,
+        'junio':junio
+      },
+      'tercero':{
+        'julio':julio,
+        'agosto':agosto,
+        'septiembre':septiembre
+      },
+      'cuarto':{
+        'octubre':octubre,
+        'noviembre':noviembre,
+        'diciembre':diciembre
+      },
+      'validaciones':{
+        'primero':has_primero,
+        'segundo':has_segundo,
+        'tercero':has_tercero,
+        'cuarto':has_cuarto,
+      }
+    }
+    
+    return res.status(200).json(planificacion);
   } catch (error) {
     return res.status(500).json({ status: "Server Error: " + error });
   }
@@ -75,7 +130,8 @@ const update_Planificacion = async (req, res) => {
     }
 
     const temporally = await db.planificacion.update({
-        trimestre: req.body.trimestre,
+        idMes: req.body.idMes,
+        idIndicador: req.body.idIndicador,
         cantidad: req.body.cantidad,
         fechaInicio : req.body.fechaInicio,
         fechaFin:req.body.fechaFin
@@ -113,7 +169,7 @@ const disable_Planificacion = async (req, res) => {
       }
     );
     if (!temporally) {
-      res.status(200).send({ message: "la planificacion a borrar no existe" });
+      res.status(404).send({ message: "la planificacion a borrar no existe" });
     } else {
       res
         .status(200)

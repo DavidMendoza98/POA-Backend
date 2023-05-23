@@ -14,6 +14,7 @@ module.exports = function(app) {
   app.put("/depto/delete",controller.disable_depto);
   app.put("/depto/update",controller.update_depto);
   app.post("/depto/create",controller.new_depto);
+  app.get("/depto/getEmpleados/:id",controller.getEmpleados)
 };
 
 

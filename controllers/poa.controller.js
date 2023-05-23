@@ -1,16 +1,9 @@
 const db = require("../models/");
-const config = require("../config/auth.config");
-const { request, response } = require('express');
-const { Op, DataTypes, Model } = require("sequelize");
-const { departamento, unidadesejec } = require("../models/");
+const jwt = require("jsonwebtoken");
 
 //Controlador para crear un nuevo POA
 const new_POA = async (req, res) => {
     try {
-        const depart = await db.depto.findOne({ where: { id: req.body.idDepto } })
-        if (!depart) {
-            return res.status(400).json({ message: 'POA incorrecto' });
-        }
         const unidad = await db.ue.findOne({ where: { id: req.body.idUE } })
         if (!unidad) {
             return res.status(400).json({ message: 'POA incorrecto' });
@@ -25,9 +18,27 @@ const new_POA = async (req, res) => {
             fuente11: req.body.fuente11,
             fuente12: req.body.fuente12,
             fuente12B: req.body.fuente12B,
-            idDepto: depart.id,
             idUE: unidad.id,
             idInstitucion: insti.id
+        });
+        return res.status(200).json({ status: "Ok" });
+    } catch (error) {
+        console.log("error: " + error);
+        return res.status(500).json({ status: "error", error: error });
+    }
+}
+const new_poa_depto = async (req, res) => {
+    try {
+        const poa = await db.poa.findOne({ where: { id: req.body.idPoa } })
+        if (!poa) {
+            return res.status(400).json({ message: 'No se encuentra el Poa' });
+        }
+        await db.poa_depto.create({
+            fuente11: req.body.fuente11,
+            fuente12: req.body.fuente12,
+            fuente12B: req.body.fuente12B,
+            idPoaUE: poa.id,
+            idDepto: req.body.id
         });
         return res.status(200).json({ status: "Ok" });
     } catch (error) {
@@ -41,9 +52,15 @@ const updatePOA = async (req, res) => {
     try {
         const POA = await db.poa.findByPk(req.body.id);
         if (!POA) {
-            return res.status(401).send({ message: 'POA not found' })
+            return res.status(404).send({ message: 'POA not found' })
         }
-        await db.poa.update({ name: req.body.name, anio: req.body.anio, fuente11: req.body.fuente11, fuente12: req.body.fuente12, fuente12B: req.body.fuente12B, isActive: req.body.isActive, idDepto: req.body.idDepto, idUE: req.body.idUE, idInstitucion: req.body.idInstitucion }, { where: { id: req.body.id } })
+        await db.poa.update({ 
+            name: req.body.name, 
+            anio: req.body.anio, 
+            fuente11: req.body.fuente11, 
+            fuente12: req.body.fuente12, 
+            fuente12B: req.body.fuente12B
+         }, { where: { id: req.body.id } })
         return res.status(200).send({ message: "ok" });
     } catch (error) {
         res.status(500).json({
@@ -51,6 +68,25 @@ const updatePOA = async (req, res) => {
         })
     }
 }
+const updatePoaDepto = async (req, res) => {
+    try {
+        const POA = await db.poa_depto.findByPk(req.body.id);
+        if (!POA) {
+            return res.status(404).send({ message: 'POA not found' })
+        }
+        await db.poa_depto.update({ 
+            fuente11: req.body.fuente11, 
+            fuente12: req.body.fuente12, 
+            fuente12B: req.body.fuente12B
+         }, { where: { id: req.body.id } })
+        return res.status(200).send({ message: "ok" });
+    } catch (error) {
+        res.status(500).json({
+            message: 'error al actualizar ' + error
+        })
+    }
+}
+
 
 //Deshabilitar POA
 
@@ -72,6 +108,27 @@ const disable_POA = async (req, res) => {
         console.log(error);
         res.status(401).send({
             message: "Error: POA can't be disable " + error.message
+        });
+    }
+}
+const delete_POA = async (req, res) => {
+    try {
+        const temporally = await db.poa.update({
+            isDelete: true
+        }, {
+            where: {
+                id: req.body.id
+            }
+        });
+        if (temporally) {
+            res.status(200).send({
+                message: "POA is deleted"
+            });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(401).send({
+            message: "Error: POA can't be deleted " + error.message
         });
     }
 }
@@ -102,9 +159,11 @@ const active_POA = async (req, res) => {
 const get_POA = async (req, res) => {
     try {
         const all_poa = await db.poa.findAll({
-            where: { isDelete: false },
+            where: { 
+                     isDelete: false,
+                     idUE:1
+                   },
             include: [{
-                model: db.depto
             }, { model: db.ue }],
         });
         if (!all_poa) {
@@ -123,9 +182,8 @@ const get_all_poa_by_idDepto = async (req, res) => {
             {
                 where: {
                     isDelete: false,
-                    idDepto: req.params.idDepto
-                },
-                include: db.depto
+                    idUE: 1
+                }
             }
         );
         if (!all_poas) {
@@ -136,35 +194,53 @@ const get_all_poa_by_idDepto = async (req, res) => {
         return res.status(500).json({ status: "Server Error: " + error });
     }
 }
+const get_poa_depto_by = async (req, res) => {
+    try {
+        const poa_depto = await db.poa_depto.findOne(
+            {
+                where: {
+                    isDelete: false,
+                    id: req.params.id
+                }
+
+            }
+        );
+        if (!poa_depto) {
+            return res.status(404).send({ message: 'No hay ningún elemento' });
+        }
+        const poa_ue = await db.poa.findByPk(poa_depto.idPoaUE);
+
+        if (!poa_ue) {
+            return res.status(404).send({ message: 'No hay ningún elemento' });
+        }
+        return res.status(200).json({poa_depto,poa_ue});
+    } catch (error) {
+        return res.status(500).json({ status: "Server Error: " + error });
+    }
+}
 
 const misPOAs = async (req, res) => {
     try {
-        const verificaruser = await db.empleado_depto.findAll(
-            {
-                where: {
-                    idEmpleado: req.params.idEmpleado,
-                    idDepto: req.params.idDepto
-                }
-            }
-        );
-        if (!verificaruser) {
-            return res.status(401).send({ message: 'No hay ningún elemento' });
+        const depto = await db.depto.findByPk(req.params.idDepto);
+        if (!depto) {
+            return res.status(404).send({ message: 'No hay departamento' });
         }
-        const idPoas = await db.encargadoPOA.findAll(
+
+        poas = await db.poa_depto.findAll(
             {
-                where: {
-                    idEmpleado: req.params.idEmpleado
-                }
+                where:{isDelete: false, idDepto: depto.id},
+                include: [
+                    {
+                      model: db.depto,
+                    },
+                    {
+                      model: db.poa,
+                      where: { isActive: 1 }
+                    }
+                  ]
             }
         )
-        const Poas = []
-        for (let i = 0; i < idPoas.length; i++) {
-            const poaencontrado = await db.poa.findOne({ where: { id: idPoas[i].idPoa, idDepto: req.params.idDepto } });
-            if (poaencontrado) {
-                Poas.push(poaencontrado);
-            }
-        }
-        return res.status(200).json(Poas);
+        return res.status(200).json(poas);
     } catch (error) {
         return res.status(500).json({ status: "Server Error: " + error });
     }
@@ -172,21 +248,37 @@ const misPOAs = async (req, res) => {
 
 
 // Obetener POA por Unidad Ejecutora
-const get_all_poa_by_idUE = async (req, res) => {
+const allPoasbyUE = async (req, res) => {
     try {
-        const all_ues = await db.ue.findAll(
+        if(!req.params.token){
+            res.status(400).send({message:'falta envio de token de usuario'})
+        }
+        // const sesion = await db.sesion.findOne(
+        //     {where:{
+        //         token:req.params.token,
+        //         isActive:true,
+        //         isDelete:false
+        //     }}
+        // )
+        // if(!sesion){
+        //     res.status(401).send({message:'Acceso denegado, debe iniciar sesión'}) 
+        // }
+        const decodedToken = jwt.decode(req.params.token);
+        console.log("TOkeeeeeennnnn::::::",decodedToken);
+
+        const all_poas = await db.poa.findAll(
             {
                 where: {
                     isDelete: false,
-                    idUE: req.params.idUE
+                    idUE: decodedToken.idUE
                 },
                 include: db.ue
             }
         );
-        if (!all_ues) {
+        if (!all_poas) {
             return res.status(404).send({ message: 'No hay ningún elemento' });
         }
-        return res.status(200).json(all_ues);
+        return res.status(200).json(all_poas);
     } catch (error) {
         return res.status(500).json({ status: "Server Error: " + error });
     }
@@ -228,19 +320,78 @@ const get_all_actividades_by_idPoa = async (req, res) => {
         return res.status(500).json({ status: "Server Error: " + error });
     }
 }
+function compararDeptos(depto1, depto2) {
+    return depto1.id !== depto2.id;
+}
+get_all_poas_depto_by_idPoaUE = async (req,res)=>{
+    try{
+        // validaciones
+        if(!req.params.idPoa) return res.status(400).json({message:'id del POA no enviado'});
 
+        const poa = await db.poa.findByPk(req.params.idPoa);
+        if(!poa) return res.status(404).json({message:'Poa no encontrado'});
+
+        //obtener todos los poas de departamentos para esa Unidad Ejecutora
+        const all_poa_deptos = await db.poa_depto.findAll({
+            where:{
+                isDelete:false,
+                idPoaUE:req.params.idPoa
+            },
+            include: [db.depto,db.poa]
+        })
+        //dividir los departamentos con planificacion con los que no
+        const deptos_con_poa = all_poa_deptos.map(item=>item.depto);
+        let fuente11_asignado = 0;
+        let fuente12_asignado = 0;
+        let fuente12B_asignado = 0;
+        for (let i = 0; i < all_poa_deptos.length; i++) {
+            fuente11_asignado += parseFloat(all_poa_deptos[i].fuente11);
+            fuente12_asignado += parseFloat(all_poa_deptos[i].fuente12);
+            fuente12B_asignado += parseFloat(all_poa_deptos[i].fuente12B);
+          }
+        const deptos = await db.depto.findAll({
+            where:{
+                isDelete:false,
+                idUnidadEjecutora:poa.idUE
+            }
+        });
+        const deptos_sin_poa =  deptos.filter(item => deptos_con_poa.every(depto=>compararDeptos(item, depto)))
+          
+
+        return res.status(200).send({
+            Poa:poa,
+            presupuesto:{fuente11_asignado, fuente12_asignado, fuente12B_asignado,
+                        'fuente11_disponible':poa.fuente11 - fuente11_asignado,
+                        'fuente12_disponible':poa.fuente12 - fuente12_asignado,
+                        'fuente12B_disponible':poa.fuente12B - fuente12B_asignado},
+            all_poa_deptos,
+            deptos_con_poa,
+            deptos_sin_poa
+        });
+
+
+    }catch (error){
+        console.log(error)
+        return res.status(500).send(error);
+
+    }
+}
 
 
 module.exports = {
-
+    allPoasbyUE,
     new_POA,
     updatePOA,
     get_POA,
     disable_POA,
     get_all_poa_by_idDepto,
-    get_all_poa_by_idUE,
     get_poa,
     active_POA,
     misPOAs,
-    get_all_actividades_by_idPoa
+    get_all_actividades_by_idPoa,
+    get_all_poas_depto_by_idPoaUE,
+    delete_POA,
+    new_poa_depto,
+    updatePoaDepto,
+    get_poa_depto_by
 }

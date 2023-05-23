@@ -1,13 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-    const POA = sequelize.define("poa", {
-      name: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      anio: {
-        type: Sequelize.STRING(4),
-        allowNull: false,
-      },
+    const Poa_Depto = sequelize.define("poa_depto", {
       fuente11: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -20,11 +12,6 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      esPredeterminado: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: false
-      },
       isDelete: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
@@ -33,9 +20,10 @@ module.exports = (sequelize, Sequelize) => {
       isActive: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
-        defaultValue: false
+        defaultValue: true
       }
     });
   
-    return POA;
+    return Poa_Depto;
   };
+  

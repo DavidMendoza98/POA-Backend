@@ -137,15 +137,17 @@ const logout = async (req,res) => {
 
 // Controlador para la validacion de username
 const checkSesion = async (req, res) => {
-    if (!req.body.token) {
+    console.log("controlador");
+    if (!req.params.token) {
         return res.status(403).send({
             message: "Error debe enviar el token de sesion!",
         });
     }
     const sesion = await db.sesion.findOne({
             where: {
-                token: req.body.token,
-                isDelete: false
+                token: req.params.token,
+                isDelete: false,
+                isActive:true
             }
         }
     );
@@ -153,11 +155,11 @@ const checkSesion = async (req, res) => {
     if(!sesion){
         return res.status(401).send({message:'Token invalido'});
     }
-    
     const decodedToken = jwt.decode(sesion.token);
+    const dateCreated = new Date(sesion.createdAt);
     const dateNow = new Date();
 
-    if(decodedToken.exp < dateNow.getTime()){
+    if((decodedToken.exp + dateCreated.getTime()) < dateNow.getTime()){
         return res.status(401).send({message:"expired"});
     }
     return res.status(200).send({message:"valid"});

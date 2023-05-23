@@ -2,10 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const cookieSession = require("cookie-session");
 const init = require("./config/init.config");
-//const bcrypt = require('bcrypt');
-
-
-
+const { validarToken, validarSesion } = require('./middleware/auth.middleware');
 
 const app = express();
 
@@ -16,7 +13,15 @@ app.use(express.json());
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
 
-//app.use("/auth",user_routes); // permite usar las rutas de usuarios
+// simple route
+app.get("/", (req, res) => {
+  res.json({ message: "¡Bienvenido!" });
+});
+
+require("./routes/auth.routes")(app);
+
+app.use(validarToken,validarSesion);
+
 require("./routes/rol.routes")(app);
 require("./routes/user.routes")(app);
 require("./routes/empleado.routes")(app);
@@ -27,7 +32,6 @@ require("./routes/dimension.routes")(app);
 require("./routes/institucion.routes")(app);
 require("./routes/objetivo.routes")(app);
 require("./routes/area.routes")(app);
-require("./routes/auth.routes")(app);
 
 require("./routes/presupuesto.routes")(app)
 require("./routes/fuente.routes")(app)
@@ -80,15 +84,12 @@ app.use(
 const db = require("./models/");
 // db.sequelize.sync();
 // force: true will drop the table if it already exists
-db.sequelize.sync({force: true}).then(() => {
-  init.initial();
+db.sequelize.sync({force: false}).then(() => {
+  //init.initial();
 });
 
 
-// simple route
-app.get("/", (req, res) => {
-  res.json({ message: "¡Bienvenido!" });
-});
+
 
 // routes
 //require("./routes/user.routes")(app);
@@ -101,5 +102,7 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });
+
+
 
 app.use('images', express.static('./images'))

@@ -12,8 +12,18 @@ exports.initial = async () => {
 
         await db.role.create({
             id: 1,
-            rol: "admin",
+            rol: "super_admin",
             descripcion: "super usuario",
+        });
+        await db.role.create({
+            id: 2,
+            rol: "admin",
+            descripcion: "administrador",
+        });
+        await db.role.create({
+            id: 3,
+            rol: "planificador",
+            descripcion: "Jefe de Departamento o coordinador asignado que llevará la planificación",
         });
 
 
@@ -24,11 +34,7 @@ exports.initial = async () => {
             },
             {
                 nombre: 'HGS',
-                descripcion: 'Hospital General del Sur'
-            },
-            {
-                nombre: 'SAG',
-                descripcion: 'Secretaría de Agricultura y Ganadería'
+                descripcion: 'Hospital del Sur'
             }
         ])
 
@@ -45,7 +51,7 @@ exports.initial = async () => {
                 initialYear: '2016-01-01',
                 finalYear: '2021-01-01',
                 isActive: 1,
-                idInstitucion: 2
+                idInstitucion: 1
             },
             {
                 name: "Plan Estrategico Institucional UNAH 2021-2025",
@@ -537,32 +543,103 @@ exports.initial = async () => {
 
         await db.depto.bulkCreate([{
             name: "Coordinación Ingeniería en Sistemas",
-            descripcion: "Ingeniería en Sistemas",
+            descripcion: "Carrera trimestral",
             idUnidadEjecutora: 1
         },
         {
             name: "DEGT",
             descripcion: "Dirección Ejecutiva de Gestión de Tecnología",
             idUnidadEjecutora: 1
+        },
+        {
+            name: "Coordinación Ingeniería Agroindustrial",
+            descripcion: "Carrera trimestral",
+            idUnidadEjecutora: 1
+        },
+        {
+            name: "Coordinación Ingeniería Acuicola",
+            descripcion: "Carrera trimestral",
+            idUnidadEjecutora: 1
+        },
+        {
+            name: "Coordinación Administración y Generación de Empresas",
+            descripcion: "Carrera trimestral",
+            idUnidadEjecutora: 1
+        },
+        {
+            name: "Coordinación Comercio Internacional",
+            descripcion: "Carrera trimestral",
+            idUnidadEjecutora: 1
+        },
+        {
+            name: "Coordinación Pedagogía",
+            descripcion: "Carrera trimestral",
+            idUnidadEjecutora: 1
+        },
+        {
+            name: "Mantenimiento",
+            descripcion: "Departamento de mantenimiento general",
+            idUnidadEjecutora: 1
+        },
+        {
+            name: "Dirección",
+            descripcion: "Oficina del director del centro regional",
+            idUnidadEjecutora: 1
+        },
+        {
+            name: "VOAE",
+            descripcion: "Vicerrectía de orientación y asuntos estudiantiles",
+            idUnidadEjecutora: 1
+        },
+        {
+            name: "DIPP",
+            descripcion: "Dirección institucional de permanencia y promoción",
+            idUnidadEjecutora: 1
+        },
+        {
+            name: "Sitr13",
+            descripcion: "Sistema de información territorial región 13",
+            idUnidadEjecutora: 1
+        },
+        {
+            name: "Humanidades y Artes",
+            descripcion: "Departamento académico",
+            idUnidadEjecutora: 1
+        },
+        {
+            name: "Biblioteca",
+            descripcion: "Departamento de biblioteca",
+            idUnidadEjecutora: 1
         }]);
         await db.empleado.create({
             id: 1,
-            dni: "02012",
-            nombre: "root",
-            apellido: "root",
+            dni: "0000-0000-00000",
+            nombre: "admin",
+            apellido: "admin",
             direccion: "La libertad",
-            telefono: "123",
+            telefono: "8888-0099",
             fechaNacimiento: '1995-08-07',
             sexo: "M",
             idUnidadEjecutora: 1
         });
         await db.empleado.create({
             id: 2,
-            dni: "020133",
+            dni: "0601-1975-00189",
             nombre: "Juan ",
             apellido: "Rodriguez",
             direccion: "La libertad",
-            telefono: "123",
+            telefono: "8888-0909",
+            fechaNacimiento: '1995-08-07',
+            sexo: "M",
+            idUnidadEjecutora: 1
+        });
+        await db.empleado.create({
+            id: 3,
+            dni: "0601-1980-00110",
+            nombre: "Pedro",
+            apellido: "Ordoñez",
+            direccion: "La libertad",
+            telefono: "8888-0909",
             fechaNacimiento: '1995-08-07',
             sexo: "M",
             idUnidadEjecutora: 1
@@ -574,6 +651,20 @@ exports.initial = async () => {
             password: bcrypt.hashSync(config.secret, 8),
             idEmpleado: 1,
             idRol: 1
+        });
+        await db.user.create({
+            email: "admin@gmail.com",
+            username: "admin",
+            password: bcrypt.hashSync(config.secret, 8),
+            idEmpleado: 2,
+            idRol: 2
+        });
+        await db.user.create({
+            email: "planificador@gmail.com",
+            username: "depto",
+            password: bcrypt.hashSync(config.secret, 8),
+            idEmpleado: 3,
+            idRol: 3
         });
 
 
@@ -587,15 +678,13 @@ exports.initial = async () => {
             Descripcion: "Permite crear PEI."
         },
         {
-            Permiso: "Actualizar_PEI",
-            Descripcion: "Permite actualizar."
+            Permiso: "Gestion_Reportes"
         },
         {
-            Permiso: "Deshabilitar_PEI",
-            Descripcion: "Permite deshabilitar PEI."
+            Permiso: "Gestion_Revisiones"
         },
         {
-            Permiso: "Gestionar_POA"
+            Permiso: "Gestion_POA"
         },
         {
             Permiso: "Crear_POA",
@@ -606,48 +695,46 @@ exports.initial = async () => {
             Descripcion: "Permite deshabilitar POA."
         },
         {
-            Permiso: "Actualizar_POA",
-            Descripcion: "Permite actualizar POA."
+            Permiso: "Gestion_Usuarios"
         },
         {
-            Permiso: "Gestion_Institucion",
+            Permiso: "Gestion_RRHH",
         },
         {
-            Permiso: "Gestion_Usuario",
-            Descripcion: "Permite al usuario editar."
+            Permiso: "Gestion_Seguimientos"
         },
         {
-            Permiso: "Gestion_Mis_POAS",
+            Permiso: "Gestion_MIS_POAS",
         }]);
 
-        await db.roles_permiso.bulkCreate([{
-            idRol: 1,
-            idPermiso: 1
-        },
-        {
-            idRol: 1,
-            idPermiso: 2
-        },
-        {
-            idRol: 1,
-            idPermiso: 3
-        },
-        {
-            idRol: 1,
-            idPermiso: 4
-        },
-        {
-            idRol: 1,
-            idPermiso: 5
-        },
-        {
-            idRol: 1,
-            idPermiso: 6
-        },
-        {
-            idRol: 1,
-            idPermiso: 7
-        }]);
+        // await db.roles_permiso.bulkCreate([{
+        //     idRol: 1,
+        //     idPermiso: 1
+        // },
+        // {
+        //     idRol: 1,
+        //     idPermiso: 2
+        // },
+        // {
+        //     idRol: 1,
+        //     idPermiso: 3
+        // },
+        // {
+        //     idRol: 1,
+        //     idPermiso: 4
+        // },
+        // {
+        //     idRol: 1,
+        //     idPermiso: 5
+        // },
+        // {
+        //     idRol: 1,
+        //     idPermiso: 6
+        // },
+        // {
+        //     idRol: 1,
+        //     idPermiso: 7
+        // }]);
 
         await db.poa.bulkCreate([{
             name: "POA 2022",
@@ -656,7 +743,6 @@ exports.initial = async () => {
             fuente12: "30000",
             fuente12B: "23000",
             isActive: 1,
-            idDepto: 1,
             idUE: 1,
             idInstitucion: 1,
         },
@@ -667,17 +753,25 @@ exports.initial = async () => {
             fuente12: "30000",
             fuente12B: "23000",
             isActive: 1,
-            idDepto: 2,
             idUE: 1,
             idInstitucion: 1,
         }]);
+        await db.poa_depto.create({
+            fuente11:200,
+            fuente12:300,
+            fuente12B:500,
+            idPoaUE:1,
+            idDepto:1
+        })
         await db.actividad.create({
             nombre: 'Gira vocacional',
             descripcion: 'gira para dar a conocer la carrera en la ciudad',
             estado: 'FORMULACION',
+            resultadoActividad:'Finalidad de la misma',
             tipoActividad: 'ACADEMICA',
             categoria: 'COORDINACION',
             idPoa: 1,
+            idPoaDepto:1,
             idDepto: 1,
             idInstitucion: 1,
             idUE: 1,
@@ -687,9 +781,11 @@ exports.initial = async () => {
             nombre: 'Reparación de equipos en lab',
             descripcion: 'reparar los equipos dañados en el lab de Is',
             estado: 'FORMULACION',
+            resultadoActividad:'Finalidad de la misma',
             tipoActividad: 'ACADEMICA',
             categoria: 'COORDINACION',
             idPoa: 1,
+            idPoaDepto:1,
             idDepto: 1,
             idInstitucion: 1,
             idUE: 1,
@@ -1865,7 +1961,7 @@ exports.initial = async () => {
 
         });
 
-        db.ue_presupuesto.create({
+        await db.ue_presupuesto.create({
             anio: '2022',
             fuente11: 220000,
             fuente12:500000,
@@ -1873,7 +1969,7 @@ exports.initial = async () => {
             idUnidadEjecutora:1
         })
 
-        db.encargadoPOA.bulkCreate([{
+        await db.encargadoPOA.bulkCreate([{
             idEmpleado: 1,
             idPoa: 1
         },
@@ -1882,45 +1978,116 @@ exports.initial = async () => {
             idPoa: 2
         }]);
 
-        db.empleado_depto.bulkCreate([{
+        await db.empleado_depto.bulkCreate([{
             idEmpleado: 1,
             idDepto: 1
         },
         {
             idEmpleado: 1,
             idDepto: 2
+        },
+        {
+            idEmpleado: 2,
+            idDepto: 1
+        },
+        {
+            idEmpleado: 3,
+            idDepto: 1
         }]);
 
-        db.planificacion.bulkCreate([{
-            trimestre: "Primer Trimestre",
-            cantidad: 25,
-            fechaInicio: '2021-01-01',
-            fechaFin: '2021-03-31',
-            idActividad:1
-        },
-        {
-            trimestre: "Segundo Trimestre",
-            cantidad: 25,
-            fechaInicio: '2021-01-04',
-            fechaFin: '2021-06-30',
-            idActividad:1
-        },
-        {
-            trimestre: "Tercer Trimestre",
-            cantidad: 25,
-            fechaInicio: '2021-07-01',
-            fechaFin: '2021-09-30',
-            idActividad:1
+        await db.trimestre.bulkCreate([{
+                trimestre:'Primero'
+            },{
+                trimestre:'Segundo'
+            },{
+                trimestre:'Tercero'
+            },{
+                trimestre:'Cuarto'
+            }
+        ]);
+        db.mes.bulkCreate(
+            [
+                {
+                    mes:'Enero',
+                    idTrimestre:1 
+                },
+                {
+                    mes:'Febrero',
+                    idTrimestre:1 
+                },
+                {
+                    mes:'Marzo',
+                    idTrimestre:1 
+                },
+                {
+                    mes:'Abril',
+                    idTrimestre:2 
+                },
+                {
+                    mes:'Mayo',
+                    idTrimestre:2 
+                },
+                {
+                    mes:'Junio',
+                    idTrimestre:2 
+                },
+                {
+                    mes:'Julio',
+                    idTrimestre:3 
+                },
+                {
+                    mes:'Agosto',
+                    idTrimestre:3 
+                },
+                {
+                    mes:'Septiembre',
+                    idTrimestre:3 
+                },
+                {
+                    mes:'Octubre',
+                    idTrimestre:4 
+                },
+                {
+                    mes:'Noviembre',
+                    idTrimestre:4 
+                },
+                {
+                    mes:'Diciembre',
+                    idTrimestre:4 
+                }
+            ]
+        )
 
-        },
-        {
-            trimestre: "Cuarto Trimestre",
-            cantidad: 25,
-            fechaInicio: '2021-10-01',
-            fechaFin: '2021-12-31',
-            idActividad:1
+        // db.planificacion.bulkCreate([{
+        //     trimestre: "Primer Trimestre",
+        //     cantidad: 25,
+        //     fechaInicio: '2021-01-01',
+        //     fechaFin: '2021-03-31',
+        //     idActividad:1
+        // },
+        // {
+        //     trimestre: "Segundo Trimestre",
+        //     cantidad: 25,
+        //     fechaInicio: '2021-01-04',
+        //     fechaFin: '2021-06-30',
+        //     idActividad:1
+        // },
+        // {
+        //     trimestre: "Tercer Trimestre",
+        //     cantidad: 25,
+        //     fechaInicio: '2021-07-01',
+        //     fechaFin: '2021-09-30',
+        //     idActividad:1
 
-        }]);
+        // },
+        // {
+        //     trimestre: "Cuarto Trimestre",
+        //     cantidad: 25,
+        //     fechaInicio: '2021-10-01',
+        //     fechaFin: '2021-12-31',
+        //     idActividad:1
+
+        // }]);
 
         db.ACencargados.bulkCreate([{
             descripcion: "Encargado de Actividades",

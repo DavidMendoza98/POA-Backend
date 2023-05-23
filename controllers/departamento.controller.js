@@ -1,5 +1,32 @@
+const { empleado } = require("../models");
 const db = require("../models");
 
+
+
+const getEmpleados = async (req,res) =>{
+    try{
+        const depto = await db.depto.findByPk(req.params.id);
+        if(!depto) return res.status(404).json({message:"Departamento no encontrado"});
+
+        const empleados_list_ids = await db.empleado_depto.findAll(
+            {
+                where:{
+                    idDepto: req.params.id
+                }
+            }
+        )
+        if(!empleados_list_ids) return res.status(404).json({message:"No hay empleados asignados al departamento"});
+        const empleados = [];
+        for (let i = 0; i < empleados_list_ids.length; i++) {
+            empleados.push(await db.empleado.findByPk(empleados_list_ids[i].idEmpleado));
+        }
+
+        return res.status(200).send(empleados);
+
+    }catch(error){
+        return res.status(500).json({error})
+    }
+}
 //Funcion para crear una nueva Institucion
 const new_depto = async (req,res) =>{
     try{
@@ -95,5 +122,6 @@ module.exports = {
     get_all_deptos,
     get_depto,
     update_depto,
-    disable_depto
+    disable_depto,
+    getEmpleados
 }
