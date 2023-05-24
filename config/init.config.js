@@ -2095,6 +2095,13 @@ exports.initial = async () => {
             idActividad: 1,
         }])
 
+        db.medioVerificacion.bulkCreate([{
+            nombre:'Fatura de Compra de Combustible',
+            descripcion:'Esta factura es de la tarea de los 40 litros de combustible',
+            url:'aIdXQwFlAPBD7W9VV7EKt2in.png',
+            nombre_Archivo:'Captura de pantalla.png'
+        }])
+
     } catch (error) {
         console.log(error);
     }

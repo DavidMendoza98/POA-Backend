@@ -1,7 +1,18 @@
 module.exports = (sequelize, Sequelize) => {
     const verificacion = sequelize.define("verificacion", {
+        nombre: {
+            type: Sequelize.TEXT,
+            allowNull: false 
+          },
+          descripcion: {
+            type: Sequelize.TEXT,
+            allowNull: false 
+          },
         url: {
             type: Sequelize.TEXT
+        },
+        nombre_Archivo:{
+          type: Sequelize.TEXT,
         },
         isDelete: {
             type: Sequelize.BOOLEAN,
@@ -10,4 +21,4 @@ module.exports = (sequelize, Sequelize) => {
         }
     });
     return verificacion;
-  };
+  }
