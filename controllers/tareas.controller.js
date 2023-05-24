@@ -202,7 +202,25 @@ const AllTarea_by_idActividad = async(req,res) => {
  
     
   })
-  res.status(200).json( allTarea );
+  result = [];
+
+  for (const i of allTarea) {
+    let revisiones = await db.revision.findAll(
+      {
+        where:{
+          idForaneo: i.id,
+          tipo:"TAREA"
+        }
+      }
+    ) 
+    result.push({
+      tarea:i,
+      isRevision: revisiones.length >0 ? true : false,
+      revisiones: revisiones
+    })
+
+  }
+  res.status(200).json( result );
 } catch(error){
     res.status(400).json({
       message:'error al ingresar' + error

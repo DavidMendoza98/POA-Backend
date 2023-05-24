@@ -213,7 +213,29 @@ const getDataofActividadForRevision = async(req,res) =>{
 }
 
 
+const setAprobada = async (req,res) =>{
+    try{
+        revision = await db.revision.findOne(
+            {
+                where:{
+                    id: req.params.id
+                }
+            }
+        )
+        if(!revision) res.status(404).send({'message':'Revision no encontrada'})
 
+        await db.revision.update({
+            corregido : 1
+        },{where:{
+            id:revision.id
+        }})
+        return res.status(200).send({'message':'Actualizado con éxito'})
+
+    }catch{
+
+    }
+    
+}
 const allRevision_by_idActividad = async (req, res) => {
     try {
         const allRevision = await db.revision.findAll({
@@ -232,7 +254,7 @@ const allRevision_by_idActividad = async (req, res) => {
                 foraneo =  await db.indicadoresPoa.findOne({where:{id:i.idForaneo}});
             }
             if(i.tipo === 'PLANIFICACION'){
-                foraneo =  await db.tarea.findOne({where:{id:i.idForaneo}});
+                foraneo =  await db.planificacion.findOne({where:{id:i.idForaneo}});
             }
 
             result.push(
@@ -404,5 +426,6 @@ module.exports = {
     getPoasForRevision,
     getPoaDeptosForRevision,
     getActividadesForRevisionByIdPoaDepto,
-    getDataofActividadForRevision
+    getDataofActividadForRevision,
+    setAprobada
 }

@@ -707,34 +707,98 @@ exports.initial = async () => {
             Permiso: "Gestion_MIS_POAS",
         }]);
 
-        // await db.roles_permiso.bulkCreate([{
-        //     idRol: 1,
-        //     idPermiso: 1
-        // },
-        // {
-        //     idRol: 1,
-        //     idPermiso: 2
-        // },
-        // {
-        //     idRol: 1,
-        //     idPermiso: 3
-        // },
-        // {
-        //     idRol: 1,
-        //     idPermiso: 4
-        // },
-        // {
-        //     idRol: 1,
-        //     idPermiso: 5
-        // },
-        // {
-        //     idRol: 1,
-        //     idPermiso: 6
-        // },
-        // {
-        //     idRol: 1,
-        //     idPermiso: 7
-        // }]);
+        await db.roles_permiso.bulkCreate([{
+            idRol: 1,
+            idPermiso: 1
+        },
+        {
+            idRol: 1,
+            idPermiso: 2
+        },
+        {
+            idRol: 1,
+            idPermiso: 3
+        },
+        {
+            idRol: 1,
+            idPermiso: 4
+        },
+        {
+            idRol: 1,
+            idPermiso: 5
+        },
+        {
+            idRol: 1,
+            idPermiso: 6
+        },
+        {
+            idRol: 1,
+            idPermiso: 7
+        },
+        {
+            idRol: 1,
+            idPermiso: 8
+        },
+        {
+            idRol: 1,
+            idPermiso: 9
+        },
+        {
+            idRol: 1,
+            idPermiso: 10
+        },
+        {
+            idRol: 1,
+            idPermiso: 11
+        }
+
+
+        ,
+        {
+            idRol: 2,
+            idPermiso: 3
+        },
+        {
+            idRol: 2,
+            idPermiso: 4
+        },
+        {
+            idRol: 2,
+            idPermiso: 5
+        },
+        {
+            idRol: 2,
+            idPermiso: 8
+        },
+        {
+            idRol: 2,
+            idPermiso: 9
+        },
+        {
+            idRol: 2,
+            idPermiso: 10
+        },
+        {
+            idRol: 2,
+            idPermiso: 11
+        }
+
+
+        ,
+        {
+            idRol: 3,
+            idPermiso: 3
+        },
+        {
+            idRol: 3,
+            idPermiso: 10
+        },
+        {
+            idRol: 3,
+            idPermiso: 11
+        }
+
+    ]);
 
         await db.poa.bulkCreate([{
             name: "POA 2022",

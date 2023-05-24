@@ -14,7 +14,7 @@ module.exports = function(app) {
   app.get("/revision/delete/:id",controller.deleteRevision);
   app.get("/revision/get_all/:idActividad",controller.allRevision_by_idActividad);
   app.get("/revision/actividadesByEstado/:idPoa",controller.actividadesByEstado);
-
+  app.get("/revision/setAprobada/:id",controller.setAprobada);
   app.get("/revision/getPoasForRevision",controller.getPoasForRevision);
   app.get("/revision/getPoaDeptosForRevision/:idPoa",controller.getPoaDeptosForRevision);
   app.get("/revision/getActividadesForRevisionByIdPoaDepto/:idPoaDepto",controller.getActividadesForRevisionByIdPoaDepto);
