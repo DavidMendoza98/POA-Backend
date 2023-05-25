@@ -79,6 +79,7 @@ db.seguimiento = require("./seguimiento.model.js")(sequelize,Sequelize);
 db.medioVerificacion = require("./medioVerificacion.model.js")(sequelize,Sequelize);
 
 db.sesion = require("../models/sesion.model")(sequelize, Sequelize);
+db.subscriptions = require("../models/subscriptions.model")(sequelize, Sequelize);
 
 ///////////////////////////////index.user.js//////////////////////////////
 /////// RELACIÓN DE UNO A UNO /////////
@@ -94,6 +95,19 @@ db.user.belongsTo(db.empleado, {
     name: 'idEmpleado', allowNull: false
   }
 });
+
+db.user.hasOne(db.subscriptions, {
+  foreignKey: {
+    name: 'idUsuario', allowNull: false
+  }
+});
+db.subscriptions.belongsTo(db.user, {
+  foreignKey: {
+    name: 'idUsuario', allowNull: false
+  }
+});
+
+
 ///////////////////////////////////////////
 //////// RELACIÓN DE UNO A MUCHOS ////////
 //// UNA INSTITUCION TIENE MUCHOS pei(1:N) ////

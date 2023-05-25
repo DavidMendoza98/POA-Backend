@@ -19,8 +19,9 @@ app.get("/", (req, res) => {
 });
 
 require("./routes/auth.routes")(app);
-
+require("./routes/subscription.routes")(app);
 app.use(validarToken,validarSesion);
+
 
 require("./routes/rol.routes")(app);
 require("./routes/user.routes")(app);

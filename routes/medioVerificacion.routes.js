@@ -1,7 +1,7 @@
 'use strict'
 // const express = require('express');
-var multiparty = require('connect-multiparty');
-const path = multiparty({uploadDir:'./uploads/img'});
+//var multiparty = require('connect-multiparty');
+//const path = multiparty({uploadDir:'./uploads/img'});
 const medio = require('../controllers/medio_Verificacion.controller')
 
 
@@ -13,9 +13,9 @@ module.exports = function(app) {
       );
       next();
     });
-    app.post('/medio/registro_medio',[path],medio.registro_medio);
+    app.post('/medio/registro_medio',medio.registro_medio);
     app.get('/obtener_archivo/:file',medio.obtener_archivo);
     app.get('/listar_medios',medio.listar_medios)
-    app.put('/actualizar_medios/:id',[path],medio.actualizar_medio);
+    app.put('/actualizar_medios/:id',medio.actualizar_medio);
     app.get('/obtener_medio/:id',medio.obtener_medio);
   };
