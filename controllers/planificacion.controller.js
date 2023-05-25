@@ -48,7 +48,7 @@ const get_Planificacion = async (req, res) => {
 const get_all_Planificacion = async (req, res) => {
   try {
     // Busca todas las planificaciones que esten activas
-    const all_Planificacion = await db.planificacion.findAll({
+    const all_Planificacion_sin_filtrar = await db.planificacion.findAll({
       where: {
         isDelete: false,
         idActividad: req.params.idActividad
@@ -59,31 +59,50 @@ const get_all_Planificacion = async (req, res) => {
     });
 
     // Valida el caso de que no existan registros de planificacion
-    if (!all_Planificacion) {
+    if (!all_Planificacion_sin_filtrar) {
       return res
         .status(404)
         .send({ message: "No hay planificaciones registradas" });
     }
+    // obtiene todas las revisiones de esas planificaciones y construye un nuevo arreglo para enviar la planificacion, las revisiones y un booleano para saber si hay revisiones
+    const all_Planificacion = []
+    for (const i of all_Planificacion_sin_filtrar) {
+      let revisiones = await db.revision.findAll(
+        {
+          where:{
+            idForaneo: i.id,
+            tipo:"PLANIFICACION"
+          }
+        }
+      ) 
+      all_Planificacion.push({
+        planificacion:i,
+        isRevision: revisiones.length >0 ? true : false,
+        revisiones: revisiones
+      })
+  
+    }
 
+    // dividir el arreglo segun meses
+    let enero = all_Planificacion.filter(item => item.planificacion.idMes === 1);
+    let febrero = all_Planificacion.filter(item => item.planificacion.idMes === 2);
+    let marzo = all_Planificacion.filter(item => item.planificacion.idMes === 3);
+    let abril = all_Planificacion.filter(item => item.planificacion.idMes === 4);
+    let mayo = all_Planificacion.filter(item => item.planificacion.idMes === 5);
+    let junio = all_Planificacion.filter(item => item.planificacion.idMes === 6);
+    let julio = all_Planificacion.filter(item => item.planificacion.idMes === 7);
+    let agosto = all_Planificacion.filter(item => item.planificacion.idMes === 8);
+    let septiembre = all_Planificacion.filter(item => item.planificacion.idMes === 9);
+    let octubre = all_Planificacion.filter(item => item.planificacion.idMes === 10);
+    let noviembre = all_Planificacion.filter(item => item.planificacion.idMes === 11);
+    let diciembre = all_Planificacion.filter(item => item.planificacion.idMes === 12);
 
-    let enero = all_Planificacion.filter(item => item.idMes === 1);
-    let febrero = all_Planificacion.filter(item => item.idMes === 2);
-    let marzo = all_Planificacion.filter(item => item.idMes === 3);
-    let abril = all_Planificacion.filter(item => item.idMes === 4);
-    let mayo = all_Planificacion.filter(item => item.idMes === 5);
-    let junio = all_Planificacion.filter(item => item.idMes === 6);
-    let julio = all_Planificacion.filter(item => item.idMes === 7);
-    let agosto = all_Planificacion.filter(item => item.idMes === 8);
-    let septiembre = all_Planificacion.filter(item => item.idMes === 9);
-    let octubre = all_Planificacion.filter(item => item.idMes === 10);
-    let noviembre = all_Planificacion.filter(item => item.idMes === 11);
-    let diciembre = all_Planificacion.filter(item => item.idMes === 12);
+    let has_primero = all_Planificacion.some(item => item.planificacion.idMes>=1 && item.planificacion.idMes <= 3 );
+    let has_segundo = all_Planificacion.some(item => item.planificacion.idMes>=4 && item.planificacion.idMes <= 6 );
+    let has_tercero = all_Planificacion.some(item => item.planificacion.idMes>=7 && item.planificacion.idMes <= 9 );
+    let has_cuarto = all_Planificacion.some(item => item.planificacion.idMes>=10 && item.planificacion.idMes <= 12 );
 
-    let has_primero = all_Planificacion.some(item => item.idMes>=1 && item.idMes <= 3 );
-    let has_segundo = all_Planificacion.some(item => item.idMes>=4 && item.idMes <= 6 );
-    let has_tercero = all_Planificacion.some(item => item.idMes>=7 && item.idMes <= 9 );
-    let has_cuarto = all_Planificacion.some(item => item.idMes>=10 && item.idMes <= 12 );
-
+    // dividir los meses en trimestres y ultimo booleanos para saber si hay planificaciones en cada trimestre
     const planificacion = {
       'primer':{
         'enero':enero,
@@ -110,6 +129,9 @@ const get_all_Planificacion = async (req, res) => {
         'segundo':has_segundo,
         'tercero':has_tercero,
         'cuarto':has_cuarto,
+      },
+      'sinfiltro':{
+        all_Planificacion
       }
     }
     

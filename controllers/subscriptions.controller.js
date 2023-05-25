@@ -2,8 +2,8 @@ const db = require("../models/");
 const webpush = require('web-push');
 
 const vapidKeys = {
-    "publicKey": "BFONt7gVZdvgryU8szoYh8_HhahY8focNiNNmiXpjsZmwiPUhj2tvzj-WUjsEBImr2YYfN5bSpSX_-b25yfmNow",
-    "privateKey": "Uk0C34jtkoJ_7qfsZgN7iy4-V64BophhNqVGc4dpHeI"
+    "publicKey": "",
+    "privateKey": ""
 }
 
 webpush.setVapidDetails(
@@ -22,24 +22,45 @@ const enviarNotificacion = async(req, res) => {
         const payload = {
             "notification": {
                 "title": "POA UNAH",
-                "body": " 🎉 Su actividad ha sido aprobada con éxito ",
+                "body": " 🎉 Su actividad ha sido aprobada con éxito BHnbEKI3uY8Wv5odj45gG_pgm7yEN5pXrFO6Oy6-6hwZ2AVJyqoKphpcCbz4YHVKkGXxNmFLTlzJhA8Fu88YaNc BHnbEKI3uY8Wv5odj45gG_pgm7yEN5pXrFO6Oy6-6hwZ2AVJyqoKphpcCbz4YHVKkGXxNmFLTlzJhA8Fu88YaNc BHnbEKI3uY8Wv5odj45gG_pgm7yEN5pXrFO6Oy6-6hwZ2AVJyqoKphpcCbz4YHVKkGXxNmFLTlzJhA8Fu88YaNc ",
+                "url":"www.google.com",
                 "vibrate": [100, 50, 100],
-                "image": "https://avatars2.githubusercontent.com/u/15802366?s=460&u=ac6cc646599f2ed6c4699a74b15192a29177f85a&v=4",
+                "image": "",
                 "actions": [{
                     "action": "explore",
                     "title": "Go to the site"
                 }]
             }
         }
-    for (const i of listSubscripciones) {
+        // for (const i of listSubscripciones) {
+
+        //     const pushSubscription = {
+        //         endpoint: "https://fcm.googleapis.com/fcm/send/f367EtarxH0:APA91bHrYr6ZvwFDAFudYzVfjDpRjWOnA63insPGAxdFcRp8WZKwM2qj3sdq0uqmeG34vActi2GxvL3IOjRzH9zPwaDuc4-6KKdGlCs8StCDEj6GWkMjSDdlYPO3OeLtn7xLZmPjS7xu",
+        //         keys: {
+        //             auth: "5Nsd1wW1QeY0qWZYGOw3qA",
+        //             p256dh: "BAVPIzgTaEIHiZFPcUUQsEeNuGv9wOjviLjgNsdjDSGFONWqC7y6OxE2e0jnmrvrRGIEAfoPSeEk3d6LbRCHur4"
+        //         }
+        //     };
+        
+        //     webpush.sendNotification(
+        //         pushSubscription,
+        //         JSON.stringify(payload))
+        //         .then(res => {
+        //             console.log('Enviado !!',res);
+        //         }).catch(err => {
+        //             console.log('Error', err);
+        //         })
+            
+        // }
 
         const pushSubscription = {
-            endpoint: "https://fcm.googleapis.com/fcm/send/f367EtarxH0:APA91bHrYr6ZvwFDAFudYzVfjDpRjWOnA63insPGAxdFcRp8WZKwM2qj3sdq0uqmeG34vActi2GxvL3IOjRzH9zPwaDuc4-6KKdGlCs8StCDEj6GWkMjSDdlYPO3OeLtn7xLZmPjS7xu",
+            endpoint: 'https://updates.push.services.mozilla.com/wpush/v2/gAAAAABkb3IC1SV77fFQqPccOosfGk5oudk3r5NBZr74SfaLVUYcJd4bg1RSIIGKUintAZX_jBsEbFkC69NEBklA1x6HUHDj9cijbglrBTYdIQmx2nyYGey4nBWwVIdY2EFnoibGgCKUmOjkGAmFDCGQiQq4juJf1MrXA5iRGl3-Oky5nmacjM4',
             keys: {
-                auth: "5Nsd1wW1QeY0qWZYGOw3qA",
-                p256dh: "BAVPIzgTaEIHiZFPcUUQsEeNuGv9wOjviLjgNsdjDSGFONWqC7y6OxE2e0jnmrvrRGIEAfoPSeEk3d6LbRCHur4"
-            }
+                auth: 'dl4Y7ZhZLG2POzRINaBngg',
+                p256dh: 'BHnbEKI3uY8Wv5odj45gG_pgm7yEN5pXrFO6Oy6-6hwZ2AVJyqoKphpcCbz4YHVKkGXxNmFLTlzJhA8Fu88YaNc'
+              }
         };
+        
     
         webpush.sendNotification(
             pushSubscription,
@@ -49,8 +70,6 @@ const enviarNotificacion = async(req, res) => {
             }).catch(err => {
                 console.log('Error', err);
             })
-        
-    }
 
     res.send({ data: 'Se envio subscribete!!' })
     }catch(error){

@@ -109,14 +109,29 @@ const allindicadores = async(req,res) => {
       where: {
           isDelete: false,
           idActividad: req.params.idActividad
-      },
-      include:[{
-        model: db.actividad,
-      }],order: [
+      },order: [
         // will return `createdAt`
         ['createdAt','DESC']]
     })
-    res.status(200).json( allIndicador );
+    resultado = [];
+
+  for (const i of allIndicador) {
+    let revisiones = await db.revision.findAll(
+      {
+        where:{
+          idForaneo: i.id,
+          tipo:"INDICADOR"
+        }
+      }
+    ) 
+    resultado.push({
+      indicador:i,
+      isRevision: revisiones.length >0 ? true : false,
+      revisiones: revisiones
+    })
+
+  }
+    res.status(200).json( resultado );
   } catch(error){
       res.status(400).json({
         message:'error al ingresar' + error
