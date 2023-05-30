@@ -1,30 +1,73 @@
 const db = require("../models/");
 const jwt = require("jsonwebtoken");
+const { decodeBase64 } = require("bcryptjs");
 
 //Controlador para crear un nuevo POA
 const new_POA = async (req, res) => {
     try {
-        const unidad = await db.ue.findOne({ where: { id: req.body.idUE } })
-        if (!unidad) {
-            return res.status(400).json({ message: 'POA incorrecto' });
-        }
+        
         const insti = await db.institucion.findOne({ where: { id: req.body.idInstitucion } })
         if (!insti) {
-            return res.status(400).json({ message: 'POA incorrecto' });
+            return res.status(400).json({ message: 'No se encontro esa institucion' });
         }
-        await db.poa.create({
+        if (!req.body.techo) {
+            return res.status(400).json({ message: 'No se envia techo presupuestario' });
+        }
+        const poa = await db.poa.create({
             name: req.body.name,
             anio: req.body.anio,
-            fuente11: req.body.fuente11,
-            fuente12: req.body.fuente12,
-            fuente12B: req.body.fuente12B,
-            idUE: unidad.id,
+            idUE: req.body.idUE,
             idInstitucion: insti.id
         });
+        let techos = JSON.parse( req.body.techo );
+        for (const i of techos) {
+            await db.techo_ue.create({
+                monto: i.monto,
+                idPoa:poa.id,
+                idUE: req.body.idUE,
+                idGrupo : i.idGrupo,
+                idFuente: i.idFuente
+            })
+        }
+
         return res.status(200).json({ status: "Ok" });
     } catch (error) {
         console.log("error: " + error);
         return res.status(500).json({ status: "error", error: error });
+    }
+}
+const getdataForNewPoa = async (req,res)=>{
+    // este endpoint brinda los datos necesarios para crear un poa de UE, a;os que ya estan planificados, las fuentes y los grupos del gasto
+    try {
+        const ue = await db.poa.findAll(
+            
+            {
+                atributtes:['anio'],
+                where:{
+                    idUE:req.params.idUE,
+                    isDelete:false
+                }
+            }
+        )
+        const listaAnios = ue.map(item => parseInt(item.anio) );
+
+        const fuentes = await db.fuente.findAll({
+            where:{
+                isDelete:false
+            }
+        });
+
+        const grupos = await db.grupogasto.findAll({
+            where:{
+                isDelete:false
+            }
+        });
+
+
+        return res.status(200).send({listaAnios,fuentes,grupos})
+        
+    } catch (error) {
+        return res.status(500).send('error: ',error)
     }
 }
 const new_poa_depto = async (req, res) => {
@@ -50,17 +93,40 @@ const new_poa_depto = async (req, res) => {
 //Actualizar POA
 const updatePOA = async (req, res) => {
     try {
+        if (!req.body.id) {
+            return res.status(404).send({ message: 'No envio el id del poa' })
+        }
         const POA = await db.poa.findByPk(req.body.id);
         if (!POA) {
             return res.status(404).send({ message: 'POA not found' })
         }
-        await db.poa.update({ 
-            name: req.body.name, 
-            anio: req.body.anio, 
-            fuente11: req.body.fuente11, 
-            fuente12: req.body.fuente12, 
-            fuente12B: req.body.fuente12B
-         }, { where: { id: req.body.id } })
+        if (!req.body.techos) {
+            return res.status(404).send({ message: 'No envio los techos' })
+        }
+        let techos = JSON.parse(req.body.techos)
+        for (const i of techos) {
+            if(i.hasOwnProperty('id')){
+                let techo = await db.techo_ue.findByPk(i.id);
+                if(techo.monto < i.monto){
+                    await db.techo_ue.update(
+                        {monto:i.monto},
+                        {where:{
+                            id:i.id
+                        }}
+                    )
+                }
+            }else{
+                await db.techo_ue.create({
+                    monto: i.monto,
+                    idPoa:POA.id,
+                    idUE: POA.idUE,
+                    idGrupo : i.grupogasto.id,
+                    idFuente: i.fuente.id
+                })
+
+            }
+        }
+
         return res.status(200).send({ message: "ok" });
     } catch (error) {
         res.status(500).json({
@@ -161,7 +227,7 @@ const get_POA = async (req, res) => {
         const all_poa = await db.poa.findAll({
             where: { 
                      isDelete: false,
-                     idUE:1
+                     idUE:req.params.idUE
                    },
             include: [{
             }, { model: db.ue }],
@@ -250,27 +316,11 @@ const misPOAs = async (req, res) => {
 // Obetener POA por Unidad Ejecutora
 const allPoasbyUE = async (req, res) => {
     try {
-        if(!req.params.token){
-            res.status(400).send({message:'falta envio de token de usuario'})
-        }
-        // const sesion = await db.sesion.findOne(
-        //     {where:{
-        //         token:req.params.token,
-        //         isActive:true,
-        //         isDelete:false
-        //     }}
-        // )
-        // if(!sesion){
-        //     res.status(401).send({message:'Acceso denegado, debe iniciar sesión'}) 
-        // }
-        const decodedToken = jwt.decode(req.params.token);
-        console.log("TOkeeeeeennnnn::::::",decodedToken);
-
         const all_poas = await db.poa.findAll(
             {
                 where: {
                     isDelete: false,
-                    idUE: decodedToken.idUE
+                    idUE: req.usuario.idUE
                 },
                 include: db.ue
             }
@@ -287,7 +337,7 @@ const allPoasbyUE = async (req, res) => {
 //Obtener POA por ID
 const get_poa = async (req, res) => {
     try {
-        const poa = await db.poa.findOne({ where: { id: req.params.id } })
+        const poa = await db.poa.findOne({ where: { id: req.params.id, isDelete:false },include:[{model:db.ue}] })
         if (!poa) {
             return res.status(404).json({ message: 'No se encuentra esa dimension' });
         }
@@ -393,5 +443,6 @@ module.exports = {
     delete_POA,
     new_poa_depto,
     updatePoaDepto,
-    get_poa_depto_by
+    get_poa_depto_by,
+    getdataForNewPoa
 }

@@ -33,7 +33,7 @@ require("./routes/dimension.routes")(app);
 require("./routes/institucion.routes")(app);
 require("./routes/objetivo.routes")(app);
 require("./routes/area.routes")(app);
-
+require("./routes/techo_ue.routes")(app);
 require("./routes/presupuesto.routes")(app)
 require("./routes/fuente.routes")(app)
 require("./routes/tarea.routes")(app)

@@ -49,7 +49,8 @@ db.tarea = require("./tareas.model.js")(sequelize, Sequelize);
 db.fuente = require("./fuente.model.js")(sequelize, Sequelize);
 db.unidadmedida = require("./unidadmedida.model.js")(sequelize, Sequelize);
 db.fuentePoa = require("./fuentePoa.model.js")(sequelize,Sequelize)
-db.ue_presupuesto = require("./ue_presupuesto.model.js")(sequelize,Sequelize)
+db.techo_ue = require("./techo_ue.model.js")(sequelize,Sequelize)
+db.techo_depto = require("./techo_depto.model.js")(sequelize,Sequelize)
 // planificacion
 db.planificacion = require("./planificacion.model")(sequelize, Sequelize);
 db.trimestre = require("./trimestre.model")(sequelize, Sequelize);
@@ -143,11 +144,75 @@ db.empleado.belongsTo(db.ue, {
   foreignKey: { name: 'idUnidadEjecutora', allowNull: false }
 });
 
-db.ue.hasMany(db.ue_presupuesto, {
-  foreignKey: { name: 'idUnidadEjecutora', allowNull: false }
+// techo presupuestario unidad ejecutora
+db.ue.hasMany(db.techo_ue, {
+  foreignKey: { name: 'idUE', allowNull: false }
 });
-db.ue_presupuesto.belongsTo(db.ue, {
-  foreignKey: { name: 'idUnidadEjecutora', allowNull: false }
+db.techo_ue.belongsTo(db.ue, {
+  foreignKey: { name: 'idUE', allowNull: false }
+});
+
+db.poa.hasMany(db.techo_ue, {
+  foreignKey: { name: 'idPoa', allowNull: false }
+});
+db.techo_ue.belongsTo(db.poa, {
+  foreignKey: { name: 'idPoa', allowNull: false }
+});
+
+db.grupogasto.hasMany(db.techo_ue, {
+  foreignKey: { name: 'idGrupo', allowNull: false }
+});
+db.techo_ue.belongsTo(db.grupogasto, {
+  foreignKey: { name: 'idGrupo', allowNull: false }
+});
+db.fuente.hasMany(db.techo_ue, {
+  foreignKey: { name: 'idFuente', allowNull: false }
+});
+db.techo_ue.belongsTo(db.fuente, {
+  foreignKey: { name: 'idFuente', allowNull: false }
+});
+
+// techo presupuestario para el depto
+db.ue.hasMany(db.techo_depto, {
+  foreignKey: { name: 'idUE', allowNull: false }
+});
+db.techo_depto.belongsTo(db.ue, {
+  foreignKey: { name: 'idUE', allowNull: false }
+});
+
+db.poa.hasMany(db.techo_depto, {
+  foreignKey: { name: 'idPoa', allowNull: false }
+});
+db.techo_depto.belongsTo(db.poa, {
+  foreignKey: { name: 'idPoa', allowNull: false }
+});
+
+db.depto.hasMany(db.techo_depto, {
+  foreignKey: { name: 'idDepto', allowNull: false }
+});
+db.techo_depto.belongsTo(db.depto, {
+  foreignKey: { name: 'idDepto', allowNull: false }
+});
+
+db.poa_depto.hasMany(db.techo_depto, {
+  foreignKey: { name: 'idPoaDepto', allowNull: false }
+});
+db.techo_depto.belongsTo(db.poa_depto, {
+  foreignKey: { name: 'idPoaDepto', allowNull: false }
+});
+
+db.techo_ue.hasMany(db.techo_depto, {
+  foreignKey: { name: 'idTechoUE', allowNull: false }
+});
+db.techo_depto.belongsTo(db.techo_ue, {
+  foreignKey: { name: 'idTechoUE', allowNull: false }
+});
+
+db.grupogasto.hasMany(db.techo_depto, {
+  foreignKey: { name: 'idGrupo', allowNull: false }
+});
+db.techo_depto.belongsTo(db.grupogasto, {
+  foreignKey: { name: 'idGrupo', allowNull: false }
 });
 //////// RELACIÓN DE UNO A MUCHOS ////////
 //// UNA INSTITUCION TIENE MUCHOS pei(1:N) ////

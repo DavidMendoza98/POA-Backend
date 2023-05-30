@@ -11,7 +11,7 @@ module.exports = function (app) {
     );
     next();
   });
-  app.get("/POA/allPoasbyUE/:token", controller.allPoasbyUE);
+  app.get("/POA/allPoasbyUE", controller.allPoasbyUE);
 
   app.post("/POA/new_POA", controller.new_POA);
   app.post("/POA/poaDepto", controller.new_poa_depto);
@@ -27,6 +27,7 @@ module.exports = function (app) {
   app.get("/POA/getPoaDeptoById/:id", controller.get_poa_depto_by);
   app.get("/POA/getMisPoas/:idDepto", controller.misPOAs);
   app.get("/POA/getAllActivites/:idPoa",controller.get_all_actividades_by_idPoa);
+  app.get("/POA/getdataForNewPoa/:idUE",controller.getdataForNewPoa);
 };
 
 

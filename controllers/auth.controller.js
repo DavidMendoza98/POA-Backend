@@ -71,7 +71,8 @@ const login = async (req, res) => {
         const token = jwt.sign({
             idUsuario: user.id,
             idEmpleado: user.empleado.id,
-            idUE: user.empleado.idUnidadEjecutora
+            idUE: user.empleado.idUnidadEjecutora,
+            permisos:permisos
         },
             config.secret, {
                 expiresIn: 86400, // 24 horas de ducración de tokens

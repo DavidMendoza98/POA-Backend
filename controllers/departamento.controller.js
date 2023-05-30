@@ -34,9 +34,10 @@ const new_depto = async (req,res) =>{
         if(depto){
             return res.status(400).json({message:'Nombre de Departamento ya utilizado'});
         }
+        
         await db.depto.create({
             name: req.body.nombre,
-            descripcion: req.body.descripcion,
+            siglas: req.body.siglas,
             idUnidadEjecutora:req.body.idUnidadEjecutora
         });
         return res.status(200).json({status:"Ok"});
@@ -78,7 +79,7 @@ const update_depto = async (req, res) => {
     try {
         const temporally = await db.depto.update({
             name: req.body.nombre,
-            descripcion: req.body.descripcion
+            siglas: req.body.siglas
         }, {
             where: {
                 id: req.body.id

@@ -14,6 +14,7 @@ const newActividad = async (req, res) => {
         }
         
         const poaDepto = await db.poa_depto.findOne({ where: { id: req.body.idPoaDepto } })
+        const depto = await db.depto.findOne({ where: { id: poaDepto.idDepto } })
         
         if (!poaDepto) {
             return res.status(404).json({ message: 'poa del departamento incorrecto' });
@@ -22,10 +23,33 @@ const newActividad = async (req, res) => {
         if (!poa) {
             return res.status(404).json({ message: 'poa incorrecto' });
         }
+        // creacion del correlativo
+        let correlativo = poa.anio.toString() + '-';
+        // primer segmento sobre categoria de la actividad
+        if(req.body.categoria === '1') correlativo = correlativo + 'CA-';
+        if(req.body.categoria === '2') correlativo = correlativo + 'JF-';
+        if(req.body.categoria === '3') correlativo = correlativo + 'AD-';
+        
+        // segundo, tercer  y cuarto segmento sobre el diminutivo del depto , -R- sobre resultado este ultimo es permanente y el id del resultado
+        correlativo = correlativo + depto.siglas.toString() + '-R-' + req.body.idResultado.toString() + '-';
+
+        // cuarto segmento es la numero actividad registrada ese a;o
+        let cantidadActividades = await db.actividad.count({
+            where: {
+              idPoa: poa.id,
+              isDelete : false
+            }
+          })
+          cantidadActividades = cantidadActividades + 1;
+        correlativo = correlativo + cantidadActividades.toString();
+        
+
+        
         
         const actividadCreada = await db.actividad.create({
             nombre: req.body.nombre,
             descripcion: req.body.descripcion,
+            correlativo:correlativo,
             resultadoActividad:req.body.resultadoActividad,
             estado: "FORMULACION",
             tipoActividad: req.body.tipoActividad,

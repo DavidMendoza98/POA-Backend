@@ -9,6 +9,10 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.TEXT,
             allowNull: false,
         },
+        correlativo:{
+            type: Sequelize.STRING,
+            allowNull: false,
+        },
         resultadoActividad: {
             type: Sequelize.TEXT,
             allowNull: false,

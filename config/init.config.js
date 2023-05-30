@@ -543,72 +543,72 @@ exports.initial = async () => {
 
         await db.depto.bulkCreate([{
             name: "Coordinación Ingeniería en Sistemas",
-            descripcion: "Carrera trimestral",
+            siglas: "IS",
             idUnidadEjecutora: 1
         },
         {
             name: "DEGT",
-            descripcion: "Dirección Ejecutiva de Gestión de Tecnología",
+            siglas: "DEGT",
             idUnidadEjecutora: 1
         },
         {
             name: "Coordinación Ingeniería Agroindustrial",
-            descripcion: "Carrera trimestral",
+            siglas: "AGRO",
             idUnidadEjecutora: 1
         },
         {
             name: "Coordinación Ingeniería Acuicola",
-            descripcion: "Carrera trimestral",
+            siglas: "ICA",
             idUnidadEjecutora: 1
         },
         {
             name: "Coordinación Administración y Generación de Empresas",
-            descripcion: "Carrera trimestral",
+            siglas: "AGE",
             idUnidadEjecutora: 1
         },
         {
             name: "Coordinación Comercio Internacional",
-            descripcion: "Carrera trimestral",
+            siglas: "CIOA",
             idUnidadEjecutora: 1
         },
         {
             name: "Coordinación Pedagogía",
-            descripcion: "Carrera trimestral",
+            siglas: "PDG",
             idUnidadEjecutora: 1
         },
         {
             name: "Mantenimiento",
-            descripcion: "Departamento de mantenimiento general",
+            siglas: "MTO",
             idUnidadEjecutora: 1
         },
         {
             name: "Dirección",
-            descripcion: "Oficina del director del centro regional",
+            siglas: "DIR",
             idUnidadEjecutora: 1
         },
         {
             name: "VOAE",
-            descripcion: "Vicerrectía de orientación y asuntos estudiantiles",
+            siglas: "VOAE",
             idUnidadEjecutora: 1
         },
         {
             name: "DIPP",
-            descripcion: "Dirección institucional de permanencia y promoción",
+            siglas: "DIPP",
             idUnidadEjecutora: 1
         },
         {
             name: "Sitr13",
-            descripcion: "Sistema de información territorial región 13",
+            siglas: "SIT13",
             idUnidadEjecutora: 1
         },
         {
             name: "Humanidades y Artes",
-            descripcion: "Departamento académico",
+            siglas: "HUA",
             idUnidadEjecutora: 1
         },
         {
             name: "Biblioteca",
-            descripcion: "Departamento de biblioteca",
+            siglas: "BTC",
             idUnidadEjecutora: 1
         }]);
         await db.empleado.create({
@@ -803,9 +803,6 @@ exports.initial = async () => {
         await db.poa.bulkCreate([{
             name: "POA 2022",
             anio: '2022',
-            fuente11: "22000",
-            fuente12: "30000",
-            fuente12B: "23000",
             isActive: 1,
             idUE: 1,
             idInstitucion: 1,
@@ -813,9 +810,6 @@ exports.initial = async () => {
         {
             name: "POA 2021",
             anio: '2021',
-            fuente11: "22000",
-            fuente12: "30000",
-            fuente12B: "23000",
             isActive: 1,
             idUE: 1,
             idInstitucion: 1,
@@ -830,6 +824,7 @@ exports.initial = async () => {
         await db.actividad.create({
             nombre: 'Gira vocacional',
             descripcion: 'gira para dar a conocer la carrera en la ciudad',
+            correlativo:'CA-IS-R-01-01',
             estado: 'FORMULACION',
             resultadoActividad:'Finalidad de la misma',
             tipoActividad: 'ACADEMICA',
@@ -844,6 +839,7 @@ exports.initial = async () => {
         await db.actividad.create({
             nombre: 'Reparación de equipos en lab',
             descripcion: 'reparar los equipos dañados en el lab de Is',
+            correlativo:'CA-IS-R-01-02',
             estado: 'FORMULACION',
             resultadoActividad:'Finalidad de la misma',
             tipoActividad: 'ACADEMICA',
@@ -2025,13 +2021,7 @@ exports.initial = async () => {
 
         });
 
-        await db.ue_presupuesto.create({
-            anio: '2022',
-            fuente11: 220000,
-            fuente12:500000,
-            fuente12B: 120000,
-            idUnidadEjecutora:1
-        })
+        
 
         await db.encargadoPOA.bulkCreate([{
             idEmpleado: 1,

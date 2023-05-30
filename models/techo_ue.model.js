@@ -1,12 +1,8 @@
 module.exports = (sequelize, Sequelize) => {
-    const Depto = sequelize.define("depto", {
-      name: {
-        type: Sequelize.STRING,
+    const techo_ue = sequelize.define("techo_ue", {
+      monto: {
+        type: Sequelize.DECIMAL,
         allowNull: false,
-      },
-      siglas: {
-        type: Sequelize.STRING,
-        allowNull: false
       },
       isDelete: {
         type: Sequelize.BOOLEAN,
@@ -15,5 +11,5 @@ module.exports = (sequelize, Sequelize) => {
       }
     });
   
-    return Depto;
+    return techo_ue;
   };

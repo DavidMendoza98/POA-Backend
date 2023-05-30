@@ -8,23 +8,6 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING(4),
         allowNull: false,
       },
-      fuente11: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      fuente12: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      fuente12B: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      esPredeterminado: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: false
-      },
       isDelete: {
         type: Sequelize.BOOLEAN,
         allowNull: false,

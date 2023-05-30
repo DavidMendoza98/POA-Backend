@@ -2,8 +2,8 @@ const db = require("../models/");
 const webpush = require('web-push');
 
 const vapidKeys = {
-    "publicKey": "",
-    "privateKey": ""
+    "publicKey": "BOGaom5t7Rgfbxc9u9pxnw4HoFPSfsSMLJUbE3xwn-uO9yve_qnLlQc2OY-f6GTHiFGeGYcJotTIy5o6YmeYD_8",
+    "privateKey": "prBCZ0tk1BrNKfv9tB490zXVNdVRxHxXftrKf3bIb5k"
 }
 
 webpush.setVapidDetails(
