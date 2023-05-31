@@ -6,6 +6,7 @@ const config = require("./auth.config.js");
 //const Sesion = db.sesion;
 
 
+
 exports.initial = async () => {
     try {
 
