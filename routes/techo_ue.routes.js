@@ -9,4 +9,6 @@ module.exports = function(app) {
     next();
   });
   app.get("/techo_ue/get_all/:idPoa",controller.get_all_techos_by_idpoa);
+  app.get("/techo_ue/get_all_for_create_techo_depto/:idPoa",controller.get_techos_ue_for_create_techo_depto);
+  app.put("/techo_ue/delete",controller.delete_techo_ue);
 }
