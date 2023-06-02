@@ -1,4 +1,4 @@
-const db = require("../models/");
+const db = require("../models");
 
 const get_all_techos_by_idpoa = async (req,res)=>{
     try{
@@ -89,13 +89,39 @@ const get_techos_ue_for_create_techo_depto = async (req,res) => {
         return res.status(200).send(result)
 
     } catch (error) {
-        console.log(error)
         return res.status(500).send({"message":'Error al eliminar el techo presupuestario de la unidad ejecutora ',"error":error});
     }
 }
 
+const get_techos_depto_by_poa_y_depto = async (req,res)=>{
+    try {
+        if(!req.params.idPoa){
+            return res.status(400).send({"message":"No ha sido posible obtener los datos de la planificacion"})
+        }
+        if(!req.params.idDepto){
+            return res.status(400).send({"message":"No ha sido posible obtener los datos del departamento"})
+        }
+        const poa_depto = await db.poa_depto.findOne({
+            where:{
+                isDelete:false,
+                idPoaUE:req.params.idPoa,
+                idDepto:req.params.idDepto
+            }
+        })
+        const techos_depto = await db.techo_depto.findAll({
+            where:{
+                idPoa:req.params.idPoa,
+                isDelete:false
+            }
+        })
+        return res.status(200).send(techos_depto)
+    } catch (error) {
+        return res.status(500).send({"message":'Error al eliminar el techo presupuestario de la unidad ejecutora ',"error":error});
+    }
+}
 module.exports = {
     get_all_techos_by_idpoa,
     delete_techo_ue,
-    get_techos_ue_for_create_techo_depto
+    get_techos_ue_for_create_techo_depto,
+    get_techos_depto_by_poa_y_depto
 }

@@ -1,4 +1,4 @@
-const controller = require("../controllers/techo_ue.controller");
+const controller = require("../controllers/techos.controller");
 
 module.exports = function(app) {
   app.use(function(req, res, next) {

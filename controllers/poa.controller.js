@@ -76,13 +76,25 @@ const new_poa_depto = async (req, res) => {
         if (!poa) {
             return res.status(400).json({ message: 'No se encuentra el Poa' });
         }
-        await db.poa_depto.create({
-            fuente11: req.body.fuente11,
-            fuente12: req.body.fuente12,
-            fuente12B: req.body.fuente12B,
+        const poa_depto = await db.poa_depto.create({
             idPoaUE: poa.id,
             idDepto: req.body.id
         });
+
+        const techos = JSON.parse(req.body.techos);
+        for (const i of techos) {
+            let techo = await db.techo_ue.findByPk(i.idTecho);
+            await db.techo_depto.create({
+                monto:i.monto,
+                idUE:techo.idUE,
+                idPoa:techo.idPoa,
+                idDepto:req.body.id,
+                idPoaDepto:poa_depto.id,
+                idTechoUE:techo.id,
+                idGrupo:techo.idGrupo
+
+            })
+        }
         return res.status(200).json({ status: "Ok" });
     } catch (error) {
         console.log("error: " + error);

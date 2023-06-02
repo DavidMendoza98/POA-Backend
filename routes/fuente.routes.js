@@ -14,5 +14,5 @@ module.exports = function(app) {
   app.get("/fuente/eliminar/:id",controller.eliminarFuente);
   app.post("/fuente/crear",controller.newFuente);
   app.put("/fuente/actualizar",controller.updateFuente);
-  app.get("/fuente/get_all_by_id/:id", controller.AllFuente_by_id)
+  app.get("/fuente/get_all_by_id/:id", controller.AllFuente_by_id);
 };

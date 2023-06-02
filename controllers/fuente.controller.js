@@ -17,9 +17,7 @@ const AllFuente = async(req,res) => {
     })
     res.status(200).json( allFuente );
   } catch(error){
-      res.status(400).json({
-        message:'error al ingresar' + error
-      })
+      res.status(400).json({"message":'No se ha podido obtener datos del servidor',"error":error})
   }
   };
 // Segundo listo
