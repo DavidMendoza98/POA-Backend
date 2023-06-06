@@ -279,7 +279,7 @@ const get_poa_depto_by = async (req, res) => {
                 where: {
                     isDelete: false,
                     id: req.params.id
-                }
+                },include:[{model:db.depto}]
 
             }
         );
