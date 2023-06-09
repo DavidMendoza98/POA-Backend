@@ -138,7 +138,6 @@ const logout = async (req,res) => {
 
 // Controlador para la validacion de username
 const checkSesion = async (req, res) => {
-    console.log("controlador");
     if (!req.params.token) {
         return res.status(403).send({
             message: "Error debe enviar el token de sesion!",

@@ -53,7 +53,13 @@ const getPoaDeptosForRevision = async(req,res) => {
         const resultado = []
         for (const i of poaDeptos) {
             // obtener el dinero que se le asigno a ese departamento
-            let presupuesto = parseFloat(i.fuente11) + parseFloat( i.fuente12) + parseFloat( i.fuente12B);
+            let presupuesto = await db.techo_depto.sum('monto',{
+                where:{
+                    isDelete:false,
+                    idPoaDepto : i.id
+                }
+            })
+            
             
             // obtener todas las actividades
             let actividadesPoaDepto = await db.actividad.findAll(
@@ -144,7 +150,7 @@ const getDataofActividadForRevision = async(req,res) =>{
     }
 
     try{
-            const TareasConPresupuestoArray = []
+            let TareasConPresupuestoArray = []
             const tareasSinPresupuesto = await db.tarea.findAll({
                 where:{
                     isDelete : false,
@@ -164,9 +170,9 @@ const getDataofActividadForRevision = async(req,res) =>{
             })
 
             const idsTareasConPresupuesto = TareasConPresupuesto.map(item => item.id);
-
+            
             for (const j of idsTareasConPresupuesto) {
-                const presupuesto = await db.presupuesto.findAll({
+                const presupuesto = await db.presupuesto.findOne({
                     where:{
                         isDelete : false,
                         idtarea : j
@@ -176,6 +182,9 @@ const getDataofActividadForRevision = async(req,res) =>{
                 TareasConPresupuestoArray.push(presupuesto);
                 
             }
+            // filtrando nulos
+            TareasConPresupuestoArray = TareasConPresupuestoArray.filter(item => item !== null);
+            
 
             const indicadores = await db.indicadoresPoa.findAll({
                 where:{

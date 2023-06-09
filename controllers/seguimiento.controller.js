@@ -145,6 +145,29 @@ const newMedVer = async (req, res) => {
     }
 };
 
+const get_poas_for_tracking = async (req,res) =>{
+    try {
+        if (!req.usuario) {
+            return res.status(401).send({ "message": "No ha sido posible obtener los datos del usuario" })
+        }
+        const empleado = await db.empleado.findOne({
+            where:{
+                id:req.usuario.idEmpleado,
+                isDelete:false
+            }
+        })
+        if (!empleado) {
+            return res.status(404).send({ "message": "Empleado no encontrado en la base de datos" })
+        }
+        
+
+
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send({ "message": 'Error al obtener los datos de las planificacion para dar seguimiento ', "error": error });
+    }
+}
+
 
 module.exports = {
     allSeguimientos,
