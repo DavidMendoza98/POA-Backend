@@ -87,9 +87,9 @@ app.use(
 const db = require("./models/");
 // db.sequelize.sync();
 // force: true will drop the table if it already exists
-db.sequelize.sync({force: false}).then(() => {
-  //init.initial();
-});
+// db.sequelize.sync({force: false}).then(() => {
+//   init.initial();
+// });
 
 
 

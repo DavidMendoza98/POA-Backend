@@ -2022,17 +2022,6 @@ exports.initial = async () => {
 
         });
 
-        
-
-        await db.encargadoPOA.bulkCreate([{
-            idEmpleado: 1,
-            idPoa: 1
-        },
-        {
-            idEmpleado: 1,
-            idPoa: 2
-        }]);
-
         await db.empleado_depto.bulkCreate([{
             idEmpleado: 1,
             idDepto: 1
@@ -2113,48 +2102,43 @@ exports.initial = async () => {
             ]
         )
 
-        // db.planificacion.bulkCreate([{
-        //     trimestre: "Primer Trimestre",
-        //     cantidad: 25,
-        //     fechaInicio: '2021-01-01',
-        //     fechaFin: '2021-03-31',
-        //     idActividad:1
-        // },
-        // {
-        //     trimestre: "Segundo Trimestre",
-        //     cantidad: 25,
-        //     fechaInicio: '2021-01-04',
-        //     fechaFin: '2021-06-30',
-        //     idActividad:1
-        // },
-        // {
-        //     trimestre: "Tercer Trimestre",
-        //     cantidad: 25,
-        //     fechaInicio: '2021-07-01',
-        //     fechaFin: '2021-09-30',
-        //     idActividad:1
-
-        // },
-        // {
-        //     trimestre: "Cuarto Trimestre",
-        //     cantidad: 25,
-        //     fechaInicio: '2021-10-01',
-        //     fechaFin: '2021-12-31',
-        //     idActividad:1
-
-        // }]);
+        db.planificacion.bulkCreate([{
+            cantidad: 25,
+            fechaInicio: '2021-01-01',
+            fechaFin: '2021-03-31',
+            idActividad:1,
+            idIndicador:1,
+            idMes:1
+        }]);
 
         db.ACencargados.bulkCreate([{
             descripcion: "Encargado de Actividades",
             idEmpleado: 1,
             idActividad: 1,
         }])
+        db.seguimiento_planificacion.bulkCreate([{
+            seguimiento: "Compra de combustible",
+            ejecutado:20,
+            fecha: '2021-10-01',
+            idPlanificacion:1,
+            idActividad: 1,
+            idPoaDepto:1
+        }])
+
+        db.seguimiento_tarea.bulkCreate([{
+            seguimiento: "Compra de combustible",
+            fecha: '2021-10-01',
+            idTarea:1,
+            idActividad: 1,
+            idPoaDepto:1
+        }])
 
         db.medioVerificacion.bulkCreate([{
             nombre:'Fatura de Compra de Combustible',
             descripcion:'Esta factura es de la tarea de los 40 litros de combustible',
             url:'aIdXQwFlAPBD7W9VV7EKt2in.png',
-            nombre_Archivo:'Captura de pantalla.png'
+            nombre_Archivo:'Captura de pantalla.png',
+            idSeguimiento:1
         }])
 
     } catch (error) {

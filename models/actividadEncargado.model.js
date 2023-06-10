@@ -1,6 +1,6 @@
 const DataTypes = require('sequelize').DataTypes;
 module.exports = (sequelize, Sequelize) => {
-    const ACencargados = sequelize.define("ACencargados", {
+    const ACencargados = sequelize.define("Empleado_Actividad", {
 
         isDelete: {
             type: Sequelize.BOOLEAN,

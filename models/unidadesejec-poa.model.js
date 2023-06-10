@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-    const UE = sequelize.define("ejecutora", {
+    const UE = sequelize.define("Unidad_Ejecutora", {
       name: {
         type: Sequelize.STRING,
         allowNull: false,

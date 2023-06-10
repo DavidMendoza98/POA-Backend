@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) =>{
-    const IndicadoresPoa = sequelize.define("indicadoresPoa", {
+    const IndicadoresPoa = sequelize.define("indicadores", {
         nombre: {
            type: Sequelize.TEXT,
            allowNull: false

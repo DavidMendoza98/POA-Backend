@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-    const verificacion = sequelize.define("verificacion", {
+    const verificacion = sequelize.define("medio_verificacion", {
         nombre: {
             type: Sequelize.TEXT,
             allowNull: false 

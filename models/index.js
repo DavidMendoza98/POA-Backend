@@ -25,63 +25,92 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
+// modelos para auth
 db.user = require("./usuario.model.js")(sequelize, Sequelize);
 db.role = require("./role.model.js")(sequelize, Sequelize);
-db.empleado = require("./empleado.model.js")(sequelize, Sequelize);
 db.permiso = require("./permiso.model.js")(sequelize, Sequelize);
 db.roles_permiso = require("./roles_permiso.model")(sequelize, Sequelize);
-db.empleado_depto = require("./empleado_depto.model")(sequelize, Sequelize);
-db.encargadoPOA = require("./encargadoPOA.model")(sequelize, Sequelize);
+db.sesion = require("../models/sesion.model")(sequelize, Sequelize);
 
+
+// modelos para parte administrativa
+db.institucion = require("./institucion.model.js")(sequelize, Sequelize);
+db.ue = require("./unidadesejec-poa.model.js")(sequelize, Sequelize);
+db.depto = require("./departamento-poa.model.js")(sequelize, Sequelize);
+
+// modelos para personal
+
+db.empleado = require("./empleado.model.js")(sequelize, Sequelize);
+db.empleado_depto = require("./empleado_depto.model")(sequelize, Sequelize);
+
+// modelos del plan estrategico institucional
 db.pei = require("./pei.model.js")(sequelize, Sequelize);
 db.dimension = require("./dimension.model.js")(sequelize, Sequelize);
 db.objetivos = require("./objetivos.model.js")(sequelize, Sequelize);
-db.objetivos = require("./objetivos.model.js")(sequelize, Sequelize);
-db.institucion = require("./institucion.model.js")(sequelize, Sequelize);
-db.resultado = require("./resultados.model.js")(sequelize, Sequelize);
 db.areas = require("./areas.model.js")(sequelize, Sequelize);
+db.resultado = require("./resultados.model.js")(sequelize, Sequelize);
 
-////Gestion POA
-db.objetogasto= require("./objetogasto.model.js")(sequelize, Sequelize);
-db.grupogasto= require("./grupogasto.model.js")(sequelize, Sequelize);
-db.presupuesto = require("./presupuesto.model.js")(sequelize,Sequelize);
-db.tarea = require("./tareas.model.js")(sequelize, Sequelize);
+// modelos para planificaciones anuales 
+db.poa = require("./poa-poa.model.js")(sequelize, Sequelize);
+db.poa_depto = require("./poa-depto.model.js")(sequelize, Sequelize);
+
+// modelos para techos presupuestario de los poas
 db.fuente = require("./fuente.model.js")(sequelize, Sequelize);
-db.unidadmedida = require("./unidadmedida.model.js")(sequelize, Sequelize);
-db.fuentePoa = require("./fuentePoa.model.js")(sequelize,Sequelize)
+db.grupogasto= require("./grupogasto.model.js")(sequelize, Sequelize);
+db.objetogasto= require("./objetogasto.model.js")(sequelize, Sequelize);
+
 db.techo_ue = require("./techo_ue.model.js")(sequelize,Sequelize)
 db.techo_depto = require("./techo_depto.model.js")(sequelize,Sequelize)
-// planificacion
+
+// modelos para actividad (pertenecen a un poa_depto)
+db.actividad = require("./actividad.model.js")(sequelize, Sequelize);
+db.ACencargados = require("./actividadEncargado.model.js")(sequelize, Sequelize);
+
+// modelos relacionados con actividad
+db.tarea = require("./tareas.model.js")(sequelize, Sequelize);
+db.indicadoresPoa = require("./indicadores_poa.model.js")(sequelize, Sequelize);
 db.planificacion = require("./planificacion.model")(sequelize, Sequelize);
+db.revision = require("./revision.model")(sequelize, Sequelize);
+
+// modelos relacionados con tareas
+db.tareas_historico = require("./tareas_historico.model.js")(sequelize,Sequelize); // sirve para dar consejos en planificacion
+db.presupuesto = require("./presupuesto.model.js")(sequelize,Sequelize);
+db.unidadmedida = require("./unidadmedida.model.js")(sequelize, Sequelize);
+
+// modelos relacionados con planificacion
 db.trimestre = require("./trimestre.model")(sequelize, Sequelize);
 db.mes = require('./mes.model')(sequelize, Sequelize);
 
-//revision de tareas
-db.revision = require("./revision.model")(sequelize, Sequelize);
-
-////////////////MODULO POA///////////////////////////
-db.ue = require("./unidadesejec-poa.model.js")(sequelize, Sequelize);
-db.depto = require("./departamento-poa.model.js")(sequelize, Sequelize);
-db.poa = require("./poa-poa.model.js")(sequelize, Sequelize);
-db.poa_depto = require("./poa-depto.model.js")(sequelize, Sequelize);
-//db.areas = require("./planificacion.model")(sequelize, Sequelize);
-db.actividad = require("./actividad.model.js")(sequelize, Sequelize);
-db.ACencargados = require("./actividadEncargado.model.js")(sequelize, Sequelize);
-db.objetogasto= require("./objetogasto.model.js")(sequelize, Sequelize);
-db.grupogasto= require("./grupogasto.model.js")(sequelize, Sequelize);
-db.presupuesto = require("./presupuesto.model.js")(sequelize,Sequelize);
-db.tarea = require("./tareas.model.js")(sequelize, Sequelize);
-db.fuente = require("./fuente.model.js")(sequelize, Sequelize);
-db.unidadmedida = require("./unidadmedida.model.js")(sequelize, Sequelize);
-db.indicadoresPoa = require("./indicadores_poa.model.js")(sequelize, Sequelize);
-db.tareas_historico = require("./tareas_historico.model.js")(sequelize,Sequelize);
-db.fuentePoa = require("./fuentePoa.model.js")(sequelize,Sequelize);
-db.seguimiento = require("./seguimiento.model.js")(sequelize,Sequelize);
+//modelos para seguimiento de lo planificado
+db.seguimiento_planificacion = require("./seguimiento_planificacion.model.js")(sequelize,Sequelize);
+db.seguimiento_tarea = require("./seguimiento_tarea.model.js")(sequelize,Sequelize);
 db.medioVerificacion = require("./medioVerificacion.model.js")(sequelize,Sequelize);
 
-db.sesion = require("../models/sesion.model")(sequelize, Sequelize);
-db.subscriptions = require("../models/subscriptions.model")(sequelize, Sequelize);
+// modelos para notificacion de eventos
+db.subscriptions = require("../models/subscriptions.model")(sequelize, Sequelize); // para notificaciones push
+db.evento = require("../models/evento.model")(sequelize, Sequelize);
 
+
+db.user.hasMany(db.subscriptions, {
+  foreignKey: { name: 'idUser', allowNull: false }
+});
+db.subscriptions.belongsTo(db.user, {
+  foreignKey: { name: 'idUser', allowNull: false }
+});
+
+db.user.hasMany(db.evento, {
+  foreignKey: { name: 'idUser', allowNull: false }
+});
+db.evento.belongsTo(db.user, {
+  foreignKey: { name: 'idUser', allowNull: false }
+});
+
+db.actividad.hasMany(db.evento, {
+  foreignKey: { name: 'idActividad', allowNull: false }
+});
+db.evento.belongsTo(db.actividad, {
+  foreignKey: { name: 'idActividad', allowNull: false }
+});
 ///////////////////////////////index.user.js//////////////////////////////
 /////// RELACIÓN DE UNO A UNO /////////
 //// UN USUARIO PERTENECE A UN EMPLEADO, UN EMPLEADO TIENE UN USUARIO ////
@@ -264,21 +293,7 @@ db.user.belongsTo(db.role, {
 ////////////////////////////////////////////
 /////// RELACIÓN DE UNO A MUCHOS /////////
 //// UN USUARIO TIENE MUCHAS SESIONES, UN SESION TIENE UN USUARIOS(1:N)////
-/*db.user.hasMany(db.sesion, {
-  foreignKey: { name: 'idUsuario', allowNull: false }
-});
-db.sesion.belongsTo(db.user, {
-  foreignKey: { name: 'idUsuario', allowNull: false }
-});*/
 
-// Relacion de muchos a muchos Roles y Permisos -- Letty
-/*
-db.permiso.hasMany(db.permiso, {
-  primaryKey: { name: 'idPermiso', allowNull: false }
-});
-db.role.belongsTo(db.role, {
-  foreignKey: { name: 'idPermiso', allowNull: false }
-});*/
 
 db.permiso.belongsToMany(db.role, {
   through: db.roles_permiso,
@@ -304,18 +319,6 @@ db.depto.belongsToMany(db.empleado, {
   otherKey: "idEmpleado"
 });
 
-// Relacion Transaccional encargado POA
-
-db.empleado.belongsToMany(db.poa, {
-  through: db.encargadoPOA,
-  foreignKey: "idPoa",
-  otherKey: "idEmpleado"
-});
-db.poa.belongsToMany(db.empleado, {
-  through: db.encargadoPOA,
-  foreignKey: "idPoa",
-  otherKey: "idEmpleado"
-});
 
 
 
@@ -674,45 +677,62 @@ db.planificacion.belongsTo(db.mes, {
 ////////////// RELACIONES DE POA Y Fuente /////////
 //Un poa tiene muchas fuentes, una fuente tiene muchos poa
 
-db.poa.belongsToMany(db.fuente, {
-  through: db.fuentePoa,
-  foreignKey: "idfuente",
-  otherKey: "IdPoa"
+
+//Un tarea tiene seguimientos y estos pueden tener muchos medios de verificacion
+db.seguimiento_tarea.hasMany(db.medioVerificacion, {
+  foreignKey: {name : 'idSeguimiento' , allowNull: false }
 });
-db.fuente.belongsToMany(db.poa, {
-  through: db.fuentePoa,
-  foreignKey: "idfuente",
-  otherKey: "idPoa"
-});
-////////////// RELACIONES DE Indicadores POA Y Actividades /////////
-//Un tarea tiene un seguimiento, una actividad tiene muchos indicadores
-db.medioVerificacion.hasMany(db.seguimiento, {
-  foreignKey: {name : 'idMedVer' , allowNull: false }
-});
-db.seguimiento.belongsTo(db.medioVerificacion, {
-  foreignKey: { name: 'idMedVer', allowNull: false }
+db.medioVerificacion.belongsTo(db.seguimiento_tarea, {
+  foreignKey: { name: 'idSeguimiento', allowNull: false }
 });
 
-db.tarea.hasMany(db.seguimiento, {
-  foreignKey: {name : 'idtarea' , allowNull: false }
+db.tarea.hasMany(db.seguimiento_tarea, {
+  foreignKey: {name : 'idTarea' , allowNull: false }
 });
-db.seguimiento.belongsTo(db.tarea, {
-  foreignKey: { name: 'idtarea', allowNull: false }
+db.seguimiento_tarea.belongsTo(db.tarea, {
+  foreignKey: { name: 'idTarea', allowNull: false }
 });
 
-db.actividad.hasMany(db.seguimiento, {
+db.actividad.hasMany(db.seguimiento_tarea, {
   foreignKey: {name : 'idActividad' , allowNull: false }
 });
-db.seguimiento.belongsTo(db.actividad, {
+db.seguimiento_tarea.belongsTo(db.actividad, {
   foreignKey: { name: 'idActividad', allowNull: false }
 });
 
-db.planificacion.hasMany(db.seguimiento, {
+db.poa_depto.hasMany(db.seguimiento_tarea, {
+  foreignKey: {name : 'idPoaDepto' , allowNull: false }
+});
+db.seguimiento_tarea.belongsTo(db.poa_depto, {
+  foreignKey: { name: 'idPoaDepto', allowNull: false }
+});
+
+//Un planificacion tiene seguimientos 
+
+
+db.planificacion.hasMany(db.seguimiento_planificacion, {
   foreignKey: {name : 'idPlanificacion' , allowNull: false }
 });
-db.seguimiento.belongsTo(db.planificacion, {
+db.seguimiento_planificacion.belongsTo(db.planificacion, {
   foreignKey: { name: 'idPlanificacion', allowNull: false }
 });
+
+db.actividad.hasMany(db.seguimiento_planificacion, {
+  foreignKey: {name : 'idActividad' , allowNull: false }
+});
+db.seguimiento_planificacion.belongsTo(db.actividad, {
+  foreignKey: { name: 'idActividad', allowNull: false }
+});
+
+db.poa_depto.hasMany(db.seguimiento_planificacion, {
+  foreignKey: {name : 'idPoaDepto' , allowNull: false }
+});
+db.seguimiento_planificacion.belongsTo(db.poa_depto, {
+  foreignKey: { name: 'idPoaDepto', allowNull: false }
+});
+
+
+// revision
 
 db.actividad.hasMany(db.revision, {
   foreignKey: {name : 'idActividad' , allowNull: false }
