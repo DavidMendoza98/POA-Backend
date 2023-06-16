@@ -10,6 +10,7 @@ module.exports = function(app) {
   });
 
   app.get("/depto/get_all/:idUnidadEjecutora", controller.get_all_deptos);
+  app.get("/depto/get_my_deptos", controller.get_my_deptos);
   app.get("/depto/get/:id",controller.get_depto);
   app.put("/depto/delete",controller.disable_depto);
   app.put("/depto/update",controller.update_depto);

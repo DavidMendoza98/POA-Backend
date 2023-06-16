@@ -3,8 +3,15 @@ module.exports = (sequelize, Sequelize) => {
         seguimiento: {
             type: Sequelize.STRING
         },
+        monto_ejecutado: {
+            type: Sequelize.DECIMAL,
+            allowNull: false,
+            defaultValue: false
+        },
         fecha: {
-            type: Sequelize.DATE
+            type: Sequelize.DATE,
+            allowNull: false,
+            defaultValue: false
         },
         isDelete: {
             type: Sequelize.BOOLEAN,

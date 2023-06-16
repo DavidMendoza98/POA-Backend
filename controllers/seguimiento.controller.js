@@ -168,6 +168,27 @@ const get_poas_for_tracking = async (req,res) =>{
     }
 }
 
+const get_all_poas_depto_by_depto = async (req,res) =>{
+    try {
+        if(!req.params.idDepto){
+            return res.status(400).send({'message':'No se envió el dato del departamento para obtener sus planificaciones'});
+        }
+        const all_poa_deptos = await db.poa_depto.findAll({
+            where:{
+                isDelete : false,
+                idDepto: req.params.idDepto
+            }, include:[{
+                model:db.poa_ue,
+                    where:{
+                        isDelete:false
+                    }
+            }]
+        })
+    } catch (error) {
+        
+    }
+}
+
 
 module.exports = {
     allSeguimientos,

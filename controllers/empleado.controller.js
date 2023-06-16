@@ -43,18 +43,28 @@ const get_empleado_by_id = async (req,res) =>{
 }
 const get_empleados = async (req,res) =>{
     try{
-        const empleados_deptos = await db.empleado_depto.findAll({
+        if(!req.usuario.idUE){
+            return res.status(404).send({"message":"No se pudo encontrar datos del usuario"})
+        }
+
+        // const empleados_deptos = await db.empleado_depto.findAll({
+        //     where:{
+        //         idDepto : req.params.idDepto
+        //     },include:[{model:db.empleado, where:{idUnidadEjecutora:req.usuario.idUE}}]
+        // })
+
+        // const id_empleados = empleados_deptos.map( objeto => objeto.idEmpleado);
+        // empleados = []
+        // for (let index = 0; index < id_empleados.length; index++) {
+        //     empleados.push(await db.empleado.findByPk(id_empleados[index]));
+            
+        // }
+        const empleados = await db.empleado.findAll({
             where:{
-                idDepto : req.params.idDepto
+                isDelete:false,
+                idUnidadEjecutora:req.usuario.idUE
             }
         })
-
-        const id_empleados = empleados_deptos.map( objeto => objeto.idEmpleado);
-        empleados = []
-        for (let index = 0; index < id_empleados.length; index++) {
-            empleados.push(await db.empleado.findByPk(id_empleados[index]));
-            
-        }
         if(!empleados){
             return res.status(400).send("<h1>No existe ni un empleado</h1>");
         }

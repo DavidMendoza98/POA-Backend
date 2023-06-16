@@ -1,5 +1,6 @@
 const { empleado } = require("../models");
 const db = require("../models");
+const { Op } = require("sequelize");
 
 
 
@@ -118,11 +119,41 @@ const disable_depto = async (req, res) => {
     }
 }
 
+const get_my_deptos = async (req,res) =>{
+    try{
+        if(!req.usuario.idEmpleado){
+            return res.status(404).send({"message":"No se encontro datos del usuario"})
+        }
+
+        let  listEmpleadoDeptos = await db.empleado_depto.findAll({
+            where:{
+                idEmpleado:req.usuario.idEmpleado
+            }
+        })
+
+       const listIdsDeptosByIdEmpleado = await listEmpleadoDeptos.map(item => item.idDepto);
+        const deptos = await db.depto.findAll({
+                where:{
+                    isDelete:false,
+                    id:{[Op.in]:  listIdsDeptosByIdEmpleado}
+                }
+        })
+
+        if(!deptos){
+            return res.status(404).send({message:'no hay ningun elemento'});
+        }
+        return res.status(200).json(deptos);
+    }catch(error){
+        return res.status(500).json({error:"Server Error: "});
+    }
+}
+
 module.exports = {
     new_depto,
     get_all_deptos,
     get_depto,
     update_depto,
     disable_depto,
+    get_my_deptos,
     getEmpleados
 }

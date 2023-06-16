@@ -12,6 +12,6 @@ module.exports = function(app) {
     next();
   });
   app.get("/empleado/get/:id",controller.get_empleado_by_id);
-  app.get("/empleado/allEmpleados/:idDepto",controller.get_empleados);
+  app.get("/empleado/allEmpleados",controller.get_empleados);
   app.post("/empleado/crear",controller.new_empleado);
 };

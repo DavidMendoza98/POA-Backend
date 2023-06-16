@@ -76,7 +76,7 @@ const get_all_dimension_by_idPeiSegunRequest = async (req,res) =>{
                 } 
             )
 
-            const pei = await db.pei.findOne({where:{idInstitucion:empleado.ejecutora.idInstitucion, isActive:1}})
+            const pei = await db.pei.findOne({where:{idInstitucion:empleado.Unidad_Ejecutora.idInstitucion, isActive:1}})
             all_dimension = await db.dimension.findAll(
             { where:{isDelete:false,
                         idPei : pei.id},

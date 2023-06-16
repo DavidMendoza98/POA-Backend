@@ -2127,6 +2127,7 @@ exports.initial = async () => {
 
         db.seguimiento_tarea.bulkCreate([{
             seguimiento: "Compra de combustible",
+            monto_ejecutado:10,
             fecha: '2021-10-01',
             idTarea:1,
             idActividad: 1,
