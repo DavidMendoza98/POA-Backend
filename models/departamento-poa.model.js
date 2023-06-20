@@ -8,6 +8,14 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING,
         allowNull: false
       },
+      estructura: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      tipo: {
+        type: Sequelize.ENUM('ADMINISTRATIVO','COORDINACIÓN ACADÉMICA', 'COORDINACIÓN REGIONAL', 'DEPARTAMENTO ACADÉMICO', 'SECCIÓN ACADÉMICA','SERVICIOS'),
+        allowNull: false,
+      },
       isDelete: {
         type: Sequelize.BOOLEAN,
         allowNull: false,

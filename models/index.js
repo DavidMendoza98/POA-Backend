@@ -64,13 +64,15 @@ db.techo_depto = require("./techo_depto.model.js")(sequelize,Sequelize)
 
 // modelos para actividad (pertenecen a un poa_depto)
 db.actividad = require("./actividad.model.js")(sequelize, Sequelize);
+db.tipo_actividad = require("./tipo_actividad.model")(sequelize, Sequelize);
 db.ACencargados = require("./actividadEncargado.model.js")(sequelize, Sequelize);
 
 // modelos relacionados con actividad
 db.tarea = require("./tareas.model.js")(sequelize, Sequelize);
+db.tarea_encargado = require("./encargado_tarea.model.js")(sequelize, Sequelize);
 db.indicadoresPoa = require("./indicadores_poa.model.js")(sequelize, Sequelize);
-db.planificacion = require("./planificacion.model")(sequelize, Sequelize);
-db.revision = require("./revision.model")(sequelize, Sequelize);
+db.planificacion = require("./planificacion.model.js")(sequelize, Sequelize);
+db.revision = require("./revision.model.js")(sequelize, Sequelize);
 
 // modelos relacionados con tareas
 db.tareas_historico = require("./tareas_historico.model.js")(sequelize,Sequelize); // sirve para dar consejos en planificacion
@@ -507,11 +509,33 @@ db.ACencargados.belongsTo(db.empleado, {
   foreignKey: { name: 'idEmpleado', allowNull: false }
 });
 
+
+
 db.actividad.hasMany(db.ACencargados, {
   foreignKey: { name: 'idActividad', allowNull: false }
 });
 db.ACencargados.belongsTo(db.actividad, {
   foreignKey: { name: 'idActividad', allowNull: false }
+});
+
+db.empleado.hasMany(db.tarea_encargado, {
+  foreignKey: { name: 'idEmpleado', allowNull: false }
+});
+db.tarea_encargado.belongsTo(db.empleado, {
+  foreignKey: { name: 'idEmpleado', allowNull: false }
+});
+
+db.actividad.hasMany(db.tarea_encargado, {
+  foreignKey: { name: 'idActividad', allowNull: false }
+});
+db.tarea_encargado.belongsTo(db.actividad, {
+  foreignKey: { name: 'idActividad', allowNull: false }
+});
+db.tarea.hasMany(db.tarea_encargado, {
+  foreignKey: { name: 'idTarea', allowNull: false }
+});
+db.tarea_encargado.belongsTo(db.tarea, {
+  foreignKey: { name: 'idTarea', allowNull: false }
 });
   ///////////////////////
 
@@ -674,6 +698,17 @@ db.planificacion.belongsTo(db.mes, {
 
 
 
+
+// relaciones de tipo actividad
+
+db.tipo_actividad.hasMany(db.actividad, {
+  foreignKey: {name : 'idTipo' , 
+  allowNull: false }
+});
+db.actividad.belongsTo(db.tipo_actividad, {
+  foreignKey: { name: 'idTipo', 
+  allowNull: false }
+});
 ////////////// RELACIONES DE POA Y Fuente /////////
 //Un poa tiene muchas fuentes, una fuente tiene muchos poa
 
@@ -706,6 +741,17 @@ db.poa_depto.hasMany(db.seguimiento_tarea, {
 db.seguimiento_tarea.belongsTo(db.poa_depto, {
   foreignKey: { name: 'idPoaDepto', allowNull: false }
 });
+
+db.mes.hasMany(db.presupuesto, {
+  foreignKey: {name : 'idMes' , 
+  allowNull: false }
+});
+db.presupuesto.belongsTo(db.mes, {
+  foreignKey: { name: 'idMes', 
+  allowNull: false }
+});
+
+
 
 //Un planificacion tiene seguimientos 
 

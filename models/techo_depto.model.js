@@ -1,7 +1,7 @@
 module.exports = (sequelize, Sequelize) => {
     const techo_depto = sequelize.define("techo_depto", {
       monto: {
-        type: Sequelize.DECIMAL,
+        type: Sequelize.DECIMAL(10, 2),
         allowNull: false,
       },
       isDelete: {

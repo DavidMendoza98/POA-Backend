@@ -17,20 +17,20 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.TEXT,
             allowNull: false,
         },
-        
+        poblacion_objetivo: {
+            type: Sequelize.TEXT,
+            allowNull: false,
+        },
+        medio_verificacion: {
+            type: Sequelize.TEXT,
+            allowNull: false,
+        },
         estado: {
             type: Sequelize.ENUM('FORMULACION', 'REFORMULACION', 'REVISION', 'APROBADO', 'RECHAZADO',),
             allowNull: false,
         },
-
-
-        tipoActividad: {
-            type: Sequelize.ENUM('ACADEMICA', 'ADMINISTRATIVA'),
-            allowNull: false,
-        },
-
         categoria: {
-            type: Sequelize.ENUM('COORDINACION', 'JEFATURA','ADMINISTRATIVA'),
+            type: Sequelize.ENUM('PROGRAMAS/PROYECTOS', 'OPERACIONES'),
             allowNull: false,
         },
 

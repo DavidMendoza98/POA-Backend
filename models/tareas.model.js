@@ -8,6 +8,14 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.TEXT,
       allowNull: false
     },
+    correlativo: {
+      type: Sequelize.TEXT,
+      allowNull: false
+    },
+    estado: {
+      type: Sequelize.ENUM('REVISION', 'APROBADO', 'RECHAZADO'),
+      allowNull: false,
+    },
     isDelete: {
       type: Sequelize.BOOLEAN,
       allowNull: false,

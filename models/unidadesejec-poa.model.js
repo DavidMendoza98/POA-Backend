@@ -8,6 +8,10 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      estructura: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
       isDelete: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
