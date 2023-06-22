@@ -4,6 +4,11 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING,
             allowNull: false
         },
+        descripcion: {
+            type: Sequelize.STRING,
+            allowNull: false,
+            defaultValue:''
+        },
         identificador: {
             type: Sequelize.STRING,
             allowNull: false

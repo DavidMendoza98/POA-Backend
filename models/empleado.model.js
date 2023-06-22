@@ -6,6 +6,10 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: false,
         unique : true,
       },
+      num_empleado: {
+        type: Sequelize.STRING,
+        allowNull: false, 
+      },
       nombre: {
         type: Sequelize.STRING,
         allowNull: false, 

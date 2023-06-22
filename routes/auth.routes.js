@@ -12,5 +12,6 @@ module.exports = function(app) {
   
   app.post("/auth/login",controller.login);
   app.post("/auth/logout",controller.logout);
+  app.post("/insertar_actividades",controller.insertar_actividades);
   
 };
