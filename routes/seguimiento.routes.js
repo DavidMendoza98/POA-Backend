@@ -16,4 +16,7 @@ module.exports = function(app) {
   app.post("/seguimientoTareas/crear",controller.newSeguimiento);
   app.put("/seguimientoTareas/updateSeguimiento",controller.updateSeguimiento);
   app.post("/seguimientoTareas/crearMedio",controller.newMedVer);
+  app.get("/seguimiento/get_all_data_by_year/:year",controller.seguimiento_by_year);
+  app.get("/seguimiento/get_all_planificaciones_by_date/:date",controller.get_all_planificaciones_by_date);
+  app.get("/seguimiento/get_all_tareas_by_date/:date",controller.get_all_tareas_by_date);
 };

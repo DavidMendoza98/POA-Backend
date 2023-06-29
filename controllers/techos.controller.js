@@ -301,13 +301,33 @@ const get_techo_by_id_objeto_gasto = async (req, res) => {
             }, include:[{model:db.techo_ue, include:[{model:db.fuente}]}]
         })
 
+        let idActividades = await db.actividad.findAll({
+            atributes:['id'],
+            where:{
+                isDelete:false,
+                idPoaDepto: actividad.idPoaDepto
+            }
+        })
+
+        idActividades = idActividades.map(item => item.id);
+        let idTareas = await db.tarea.findAll({
+            atributes:['id'],
+            where:{
+                isDelete:false,
+                idActividad: {[Op.in]:  idActividades}
+            }
+        })
+
+        idTareas = idTareas.map(item => item.id);
+
         const result = []
         for (const i of techos_disponibles) {
             let sumaPresupuestos = await db.presupuesto.sum('total',{
                 where:{
                     isDelete:false,
                     idgrupo: i.idGrupo,
-                    idfuente: i.techo_ue.fuente.id
+                    idfuente: i.techo_ue.fuente.id,
+                    idtarea: {[Op.in]:  idTareas}
                 }
             })
             result.push({

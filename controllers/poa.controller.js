@@ -198,6 +198,15 @@ const delete_POA = async (req, res) => {
                 id: req.body.id
             }
         });
+
+        await db.poa_depto.update({
+            isDelete: true
+        }, {
+            where: {
+                idPoaUE: req.body.id
+            }
+        });
+
         if (temporally) {
             res.status(200).send({
                 message: "POA is deleted"

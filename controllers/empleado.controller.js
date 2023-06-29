@@ -73,10 +73,35 @@ const get_empleados = async (req,res) =>{
         return res.status(500).json({status:"Server Error ", error:error});
     }
 }
+const AllEmpleados_responsables_tarea = async (req,res)=>{
+try {
+    if(!req.params.idTarea){
+        return res.status(400).send({'message':'No envió todos los datos'});
+    }
 
+    const all_tarea_encargado = await db.tarea_encargado.findAll({
+        where:{
+            isDelete:false,
+            idTarea: req.params.idTarea
+        }
+    })
+    const id_empleados = all_tarea_encargado.map(item => item.idEmpleado);
+
+    const all_empleados = await db.empleado.findAll({
+        where:{
+            isDelete:false,
+            id: {[Op.in]:  id_empleados}
+        }
+    })
+    return res.status(200).send(all_empleados);
+} catch (error) {
+    return res.status(500).json({status:"Server Error ", error:error});
+}
+}
 
 module.exports = {
     new_empleado,
     get_empleado_by_id,
-    get_empleados
+    get_empleados,
+    AllEmpleados_responsables_tarea
   }

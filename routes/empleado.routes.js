@@ -13,5 +13,7 @@ module.exports = function(app) {
   });
   app.get("/empleado/get/:id",controller.get_empleado_by_id);
   app.get("/empleado/allEmpleados",controller.get_empleados);
+ // app.get("/empleado/allEmpleadosByIdActividad/:idActividad",controller.get_empleados_by_Actividad);
   app.post("/empleado/crear",controller.new_empleado);
+  app.get("/empleado/AllEmpleados_responsables_tarea/:idTarea",controller.AllEmpleados_responsables_tarea);
 };

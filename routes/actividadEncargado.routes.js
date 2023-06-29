@@ -11,7 +11,7 @@ module.exports = function(app) {
   app.get("/actividadEncargado/get_All",controller.get_all_actividadesEncargado);
   app.get("/actividadEncargado/get/:id",controller.get_actividadEncargado);
   app.get("/get_encargados_de_actividad/:idActividad",controller.get_encargados_de_actividad);
-  app.get("/actividadEncargado/eliminar/:id",controller.delete_actividadEncargado);
+  app.put("/actividadEncargado/eliminar",controller.delete_actividadEncargado);
   app.put("/actividadEncargado/editar",controller.updateActividadEncargado);
   app.post("/actividadEncargado/crear",controller.newActividadEncargado);
 

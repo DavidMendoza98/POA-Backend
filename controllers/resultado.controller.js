@@ -182,7 +182,7 @@ const allResultado = async(req,res) => {
         }
       ],order: [
           // will return `name`
-          ['createdAt','DESC']]
+          ['createdAt','ASC']]
     })
     res.status(200).json( allResultado );
   } catch(error){

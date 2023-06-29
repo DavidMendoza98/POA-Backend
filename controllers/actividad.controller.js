@@ -8,10 +8,6 @@ const { resultado, pei } = require("../models");
 
 const newActividad = async (req, res) => {
     try {
-        const actividad = await db.actividad.findOne({ where: { nombre: req.body.nombre } })
-        if (actividad) {
-            return res.status(400).json({ message: 'Nombre de Actividad ya utilizado' });
-        }
         
         const poaDepto = await db.poa_depto.findOne({ where: { id: req.body.idPoaDepto } })
         const depto = await db.depto.findOne({ where: { id: poaDepto.idDepto } })
@@ -23,6 +19,7 @@ const newActividad = async (req, res) => {
         if (!poa) {
             return res.status(404).json({ message: 'poa incorrecto' });
         }
+        const resultado = await db.resultado.findByPk(req.body.idResultado);
         // creacion del correlativo
         let correlativo = poa.anio.toString() + '-';
         // primer segmento sobre categoria de la actividad
@@ -31,12 +28,13 @@ const newActividad = async (req, res) => {
         if(req.body.categoria === '3') correlativo = correlativo + 'AD-';
         
         // segundo, tercer  y cuarto segmento sobre el diminutivo del depto , -R- sobre resultado este ultimo es permanente y el id del resultado
-        correlativo = correlativo + depto.siglas.toString() + '-R-' + req.body.idResultado.toString() + '-';
+        correlativo = correlativo + depto.siglas.toString() + '-R-' + resultado.idDimension.toString() + '-' + resultado.id.toString() + '-';
 
         // cuarto segmento es la numero actividad registrada ese a;o
         let cantidadActividades = await db.actividad.count({
             where: {
               idPoa: poa.id,
+              idDepto:poaDepto.idDepto,
               isDelete : false
             }
           })
@@ -51,26 +49,22 @@ const newActividad = async (req, res) => {
             descripcion: req.body.descripcion,
             correlativo:correlativo,
             resultadoActividad:req.body.resultadoActividad,
+            poblacion_objetivo: req.body.poblacion_objetivo,
+            medio_verificacion: req.body.medio_verificacion,
             estado: "FORMULACION",
-            tipoActividad: req.body.tipoActividad,
             categoria: req.body.categoria,
             idPoa: poa.id,
             idPoaDepto: poaDepto.id,
             idDepto:poaDepto.idDepto,
             idInstitucion: poa.idInstitucion,
             idUE: poa.idUE,
+            idTipo:req.body.idTipo,
             idResultado:req.body.idResultado
         });
         await db.ACencargados.create({
                idActividad: actividadCreada.id,
-               idEmpleado: req.body.responsables
+               idEmpleado: req.usuario.idEmpleado
         });
-        // for (let i = 0; i < req.body.responsables.length; i++) {
-        //     await db.ACencargados.create({
-        //         idActividad: actividadCreada.id,
-        //         idEmpleado: req.body.responsables[i]
-        //     });
-        // }
         return res.status(200).json({ status: "Ok" });
     } catch (error) {
         return res.status(500).json({ status: "Server Error: " + error });
@@ -91,6 +85,46 @@ const delete_actividad = async (req, res) => {
                 id: req.body.id
             }
         });
+        await db.indicadoresPoa.update({
+            isDelete: true
+        }, {
+            where: {
+                idActividad: req.body.id
+            }
+        });
+
+        await db.planificacion.update({
+            isDelete: true
+        }, {
+            where: {
+                idActividad: req.body.id
+            }
+        });
+        let idTareas = await db.tarea.findAll({
+            attributes:['id'],
+            where:{
+                idActividad: req.body.id
+            }
+        })
+
+        idTareas = idTareas.filter(item => item.id);
+
+        await db.tarea.update({
+            isDelete: true
+        }, {
+            where: {
+                idActividad: req.body.id
+            }
+        });
+
+        await db.presupuesto.update({
+            isDelete: true
+        }, {
+            where: {
+                idtarea: {[Op.in]:idTareas}
+            }
+        });
+
         if (delete_actividad) {
             res.status(200).send({
                 message: "actividad eliminada correctamente"
@@ -106,46 +140,38 @@ const delete_actividad = async (req, res) => {
 const updateActividad = async (req, res) => {
     try {
         if (!req.body.nombre) {
-            return res.status(400).json({ message: 'Debe enviar todos los datos' });
-        }
-        if (!req.body.nombre) {
-            return res.status(400).json({ message: 'Debe enviar todos los datos' });
+            return res.status(400).json({ message: 'Debe enviar todos los datos nombre' });
         }
         if (!req.body.descripcion) {
-            return res.status(400).json({ message: 'Debe enviar todos los datos' });
+            return res.status(400).json({ message: 'Debe enviar todos los datos des' });
+        }
+        if (!req.body.poblacion_objetivo) {
+            return res.status(400).json({ message: 'Debe enviar todos los datos pob' });
+        }
+        if (!req.body.medio_verificacion) {
+            return res.status(400).json({ message: 'Debe enviar todos los datos med' });
         }
       
         if (!req.body.resultadoActividad) {
-            return res.status(400).json({ message: 'Debe enviar todos los datos' });
+            return res.status(400).json({ message: 'Debe enviar todos los datos resula' });
         }
-        if (!req.body.tipoActividad) {
-            return res.status(400).json({ message: 'Debe enviar todos los datos' });
+        if (!req.body.idTipo) {
+            return res.status(400).json({ message: 'Debe enviar todos los datos tipo' });
         }
         if (!req.body.categoria) {
-            return res.status(400).json({ message: 'Debe enviar todos los datos' });
+            return res.status(400).json({ message: 'Debe enviar todos los datos categoria' });
         }
-        const poaDepto = await db.poa_depto.findOne({ where: { id: req.body.idPoaDepto } })
         
-        if (!poaDepto) {
-            return res.status(404).json({ message: 'poa del departamento incorrecto' });
-        }
-        const poa = await db.poa.findOne({ where: { id: poaDepto.idPoaUE} })
-        if (!poa) {
-            return res.status(404).json({ message: 'poa incorrecto' });
-        }
         
         const temporally = await db.actividad.update(
             {
                 nombre: req.body.nombre,
                 descripcion: req.body.descripcion,
                 resultadoActividad:req.body.resultadoActividad,
-                tipoActividad: req.body.tipoActividad,
+                poblacion_objetivo: req.body.poblacion_objetivo,
+                medio_verificacion: req.body.medio_verificacion,
                 categoria: req.body.categoria,
-                idPoa: poa.id,
-                idPoaDepto: poaDepto.id,
-                idDepto:poaDepto.idDepto,
-                idInstitucion: poa.idInstitucion,
-                idUE: poa.idUE,
+                idTipo:req.body.idTipo,
                 idResultado:req.body.idResultado
             },
             { where: { id: req.body.id } });
@@ -164,7 +190,17 @@ const updateActividad = async (req, res) => {
 
 const get_actividad = async (req, res) => {
     try {
-        const actividad = await db.actividad.findOne({ where: { id: req.params.id } })
+        const actividad = await db.actividad.findOne({ 
+            where: { 
+                id: req.params.id 
+            }, include: [
+                {model:db.resultado, 
+                    include:db.dimension
+                },
+                {model:db.depto},
+                {model:db.poa}
+            ]
+        })
         if (!actividad) {
             return res.status(404).json({ message: 'No se encuentra esa actividad' });
         }
@@ -223,24 +259,6 @@ const get_all_actividad_by_idPoa = async (req, res) => {
     }
 }
 
-
-const probando_like = async(req,res) => { 
-  try{ 
-    const resultado = await db.resultado.findOne({
-      where: {
-        nombre: {
-          [Op.substring]: req.params.nombre,
-        }
-    }
-    });
-  res.status(200).json( {status:"Ok",resultado} );
-} catch(error){
-    res.status(400).json({
-      message:'error al mostrar' + error
-    })
-}
-};
-
 const setEstadoDeActividad = async (req, res) => {
     try {
         if (!req.body.id) {
@@ -275,6 +293,5 @@ module.exports = {
     updateActividad,
     delete_actividad,
     get_all_actividades,
-    probando_like,
     setEstadoDeActividad
 }

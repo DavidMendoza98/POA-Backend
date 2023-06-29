@@ -168,26 +168,264 @@ const get_poas_for_tracking = async (req,res) =>{
     }
 }
 
-const get_all_poas_depto_by_depto = async (req,res) =>{
+const seguimiento_by_year = async (req,res) =>{
     try {
-        if(!req.params.idDepto){
-            return res.status(400).send({'message':'No se envió el dato del departamento para obtener sus planificaciones'});
+        if(!req.params.year){
+            return res.status(400).send({'message':'No se envió el año a dar seguimiento'});
         }
-        const all_poa_deptos = await db.poa_depto.findAll({
+        const poa = await db.poa.findOne({
             where:{
-                isDelete : false,
-                idDepto: req.params.idDepto
-            }, include:[{
-                model:db.poa_ue,
-                    where:{
-                        isDelete:false
-                    }
+                isDelete:false,
+                anio:req.params.year,
+                idUE: req.usuario.idUE
+            }
+        })
+        let idActividades = await db.ACencargados.findAll({
+            attributes:['idActividad'],
+            where:{
+                isDelete:false,
+                idEmpleado: req.usuario.idEmpleado
+            },include:[{
+                model: db.actividad,
+                where:{
+                    idPoa:poa.id
+                }
             }]
         })
+        idActividades = idActividades.map(item => item.idActividad)
+        let planificaciones = await db.planificacion.findAll({
+            where:{
+                isDelete:false,
+                idActividad : {[Op.in]:idActividades}
+            }
+        });
+
+        planificaciones = planificaciones.map(item => new Date(item.fechaInicio+' 00:00:00').getTime().toString());
+
+        return res.status(200).send(planificaciones);
     } catch (error) {
-        
+        console.log(error);
+        return res.status(500).send(error);
     }
 }
+
+const get_all_planificaciones_by_date = async (req,res)=>{
+    try {
+        if(!req.params.date){
+            return res.status(400).send({'message':'No se envió fecha a dar seguimiento'});
+        }
+        const planificaciones = await db.planificacion.findAll({
+            where:{
+                isDelete:false,
+                fechaInicio: req.params.date
+            },include:[
+                {model:db.indicadoresPoa},
+                    {
+                        model:db.actividad,
+                        where:{
+                            estado:'APROBADO'
+                        },
+                        include:db.depto
+                    }
+            ]
+        })
+        return res.status(200).send(planificaciones)
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send(error);
+    }
+}
+const get_all_tareas_by_date = async (req,res)=>{
+    try {
+        if(!req.params.date){
+            return res.status(400).send({'message':'No se envió el año a dar seguimiento'});
+        }
+        const date = new Date(req.params.date);
+        const poa = await db.poa.findOne({
+            where:{
+                isDelete:false,
+                anio:date.getFullYear(),
+                idUE: req.usuario.idUE
+            }
+        })
+        let idActividades = await db.ACencargados.findAll({
+            attributes:['idActividad'],
+            where:{
+                isDelete:false,
+                idEmpleado: req.usuario.idEmpleado
+            },include:[{
+                model: db.actividad,
+                where:{
+                    idPoa:poa.id
+                }
+            }]
+        })
+        idActividades = idActividades.map(item => item.idActividad)
+
+        const tareas = await db.tarea.findAll({
+            where:{
+                isDelete:false,
+                idActividad: {[Op.in]:idActividades}
+            }
+        })
+        const idTareas = tareas.map(item => item.id)
+
+        const presupuestos = await db.presupuesto.findAll({
+            where:{
+                isDelete:false,
+                idtarea: {[Op.in]:idTareas},
+                idMes: (date.getMonth()+1)
+            }, include:[
+                {
+                    model:db.tarea,
+                    include:[{
+                        model:db.actividad, 
+                        include: db.depto
+                    }]
+                }
+            ]
+        })
+
+        // const presupuestos = await db.presupuesto.findAll({
+        //     where:{
+        //         isDelete:false,
+
+        //     },include:[
+        //         {model:db.tarea,include:[
+        //             {model:db.actividad, 
+        //                 where:{
+        //                     idPoa:poa.id
+        //                 },
+        //                 include: db.depto
+        //             }
+        //         ]},
+        //         {model:db.mes, where:{
+        //             id: (date.getMonth()+1)
+        //         }} 
+        //     ]
+        // })
+        return res.status(200).send(presupuestos)
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send(error);
+    }
+}
+
+const get_all_planificaciones_by_year = async (req,res)=>{
+    try {
+        if(!req.params.year){
+            return res.status(400).send({'message':'No se envió fecha a dar seguimiento'});
+        }
+        const poa = await db.poa.findOne({
+            where:{
+                isDelete:false,
+                anio:req.params.year,
+                idUE: req.usuario.idUE
+            }
+        })
+        let idActividades = await db.ACencargados.findAll({
+            attributes:['idActividad'],
+            where:{
+                isDelete:false,
+                idEmpleado: req.usuario.idEmpleado
+            },include:[{
+                model: db.actividad,
+                where:{
+                    idPoa:poa.id,
+                    estado:'APROBADO'
+                }
+            }]
+        })
+        idActividades = idActividades.map(item => item.idActividad);
+        const indicadores = await db.indicadoresPoa.findAll({
+            where:{
+                isDelete:false,
+                idActividad: {[Op.in]:idActividades}
+            }
+        })
+        const id_indicadores = indicadores.map(item => item.id)
+        const planificaciones = await db.planificacion.findAll({
+            where:{
+                isDelete:false,
+                idIndicador: {[Op.in]:id_indicadores}
+            },include:[
+                {model:db.indicadoresPoa},
+                    {
+                        model:db.actividad,
+                        where:{
+                            estado:'APROBADO'
+                        },
+                        include:db.depto
+                    }
+            ]
+        })
+        return res.status(200).send(planificaciones)
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send(error);
+    }
+}
+const get_all_tareas_by_year = async (req,res)=>{
+    try {
+        if(!req.params.year){
+            return res.status(400).send({'message':'No se envió el año a dar seguimiento'});
+        }
+        
+        const poa = await db.poa.findOne({
+            where:{
+                isDelete:false,
+                anio:req.params.year,
+                idUE: req.usuario.idUE
+            }
+        })
+        let idActividades = await db.ACencargados.findAll({
+            attributes:['idActividad'],
+            where:{
+                isDelete:false,
+                idEmpleado: req.usuario.idEmpleado
+            },include:[{
+                model: db.actividad,
+                where:{
+                    idPoa:poa.id
+                }
+            }]
+        })
+        idActividades = idActividades.map(item => item.idActividad)
+
+        const tareas = await db.tarea.findAll({
+            where:{
+                isDelete:false,
+                idActividad: {[Op.in]:idActividades}
+            }
+        })
+        const idTareas = tareas.map(item => item.id)
+
+        const presupuestos = await db.presupuesto.findAll({
+            where:{
+                isDelete:false,
+                idtarea: {[Op.in]:idTareas}
+            }, include:[
+                {
+                    model:db.tarea,
+                    include:[{
+                        model:db.actividad, 
+                        include: db.depto
+                    }]
+                },
+                {
+                    model:db.mes
+                }
+            ]
+        });
+
+        return res.status(200).send(presupuestos)
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send(error);
+    }
+}
+
+
 
 
 module.exports = {
@@ -195,5 +433,10 @@ module.exports = {
     AllSeguimiento_by_idTarea,
     updateSeguimiento,
     newSeguimiento,
-    newMedVer
+    newMedVer,
+    seguimiento_by_year,
+    get_all_planificaciones_by_date,
+    get_all_tareas_by_date,
+    get_all_planificaciones_by_year,
+    get_all_tareas_by_year
 }

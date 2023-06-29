@@ -8,7 +8,6 @@ module.exports = function(app) {
     );
     next();
   });
-  app.get("/resultado/prueba/:nombre", controller.probando_like)
   app.get("/actividad/get_All",controller.get_all_actividades);
   app.get("/actividad/get/:id",controller.get_actividad);
   app.put("/actividad/eliminar",controller.delete_actividad);

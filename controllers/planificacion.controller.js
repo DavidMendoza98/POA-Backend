@@ -208,7 +208,7 @@ const get_all_planificaciones_by_idActividad = async (req,res) =>{
       const all_planificacion = await db.planificacion.findAll(
          { where:{isDelete:false,
                   idActividad : req.params.idActividad},
-          include:db.actividad}
+          include:[{model:db.indicadoresPoa},{model:db.actividad}]}
       );
       if(!all_planificacion){
           return res.status(404).send({message:'no hay ningun elemento'});

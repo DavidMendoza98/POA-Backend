@@ -590,15 +590,17 @@ const insertar_actividades = async (req,res)=>{
                 idDepto:7
             }
         })
+        const data_no_insertada = [];
         for (const i of data) {
-            console.log(i);
+            //console.log(i);
             let resultado = await db.resultado.findOne({
                 where:{
                     nombre:i.resultado_i
                 }
             })
             if (!resultado){
-                return res.status(403).send({'message':'no se encontró el resultado', 'resultado':i});
+                data_no_insertada.push(i);
+                continue;
             }
 
             
@@ -614,9 +616,10 @@ const insertar_actividades = async (req,res)=>{
                 categoria: i.categoria,
                 idPoa: 1,
                 idPoaDepto: poaDepto.id,
-                idDepto:poaDepto.idDepto,
                 idInstitucion: 1,
+                idDepto:poaDepto.idDepto,
                 idUE: 1,
+                idTipo:5,
                 idResultado:resultado.id
             });
 
@@ -693,7 +696,7 @@ const insertar_actividades = async (req,res)=>{
 
         }
 
-        return res.status(200).send({'message':'realizado con éxito'})
+        return res.status(200).send(data_no_insertada)
         
     } catch (error) {
         console.log(error)

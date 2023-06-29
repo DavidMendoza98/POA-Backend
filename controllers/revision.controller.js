@@ -130,7 +130,7 @@ const getActividadesForRevisionByIdPoaDepto = async (req,res) =>{
                     isDelete:false,
                     idPoaDepto : req.params.idPoaDepto,
                     estado: {[Op.or]: ['REVISION','APROBADO','RECHAZADO','REFORMULACION'] }
-                }
+                }, include: db.tipo_actividad
             }
         )
         if(!actividades){

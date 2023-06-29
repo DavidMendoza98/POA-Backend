@@ -9,13 +9,17 @@ const { EqualOperator } = require("typeorm");
 
 const newActividadEncargado = async (req, res) => {
     try {
-      
+        
+        if (!req.body.idEmpleado) {
+            return res.status(400).json({ message: 'Debe enviar todos los datos' });
+        }
+        if (!req.body.idActividad) {
+            return res.status(400).json({ message: 'Debe enviar todos los datos' });
+        }
 
         await db.ACencargados.create({
-          descripcion : req.body.descripcion,
-          idUser: req.body.idUser ,
+          idEmpleado: req.body.idEmpleado ,
           idActividad: req.body.idActividad
-
         });
         return res.status(200).json({ status: "Ok" });
     } catch (error) {
@@ -30,11 +34,18 @@ const newActividadEncargado = async (req, res) => {
 
 const delete_actividadEncargado = async (req, res) => {
     try {
-        const delete_actividad = await db.actividad.update({
+        if (!req.body.idEmpleado) {
+            return res.status(400).json({ message: 'Debe enviar todos los datos' });
+        }
+        if (!req.body.idActividad) {
+            return res.status(400).json({ message: 'Debe enviar todos los datos' });
+        }
+        const delete_actividad = await db.ACencargados.update({
             isDelete: true
         }, {
             where: {
-                id: req.params.id
+                idEmpleado: req.body.idEmpleado,
+                idActividad: req.body.idActividad
             }
         });
         if (delete_actividad) {
