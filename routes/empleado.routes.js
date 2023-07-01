@@ -13,5 +13,9 @@ module.exports = function(app) {
   });
   app.get("/empleado/get/:id",controller.get_empleado_by_id);
   app.get("/empleado/allEmpleados",controller.get_empleados);
-  app.post("/empleado/crear",controller.new_empleado);
+  app.get("/empleado/allUnidadesEjecutoras",controller.get_UnidadEjecutora);
+  app.post("/empleado/crear",controller.new_Empleado);
+  app.get("/empleado/delete/:id",controller.disable_empleado);
+  app.put("/empleado/update",controller.update_empleado);
+  app.get("/empleado/getDeptos",controller.get_deptos);
 };

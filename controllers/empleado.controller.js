@@ -3,19 +3,27 @@ const config = require("../config/auth.config");
 const { request, response } = require('express');
 const { Op, DataTypes, Model } = require("sequelize");
 
-const new_empleado = async (req,res) =>{
+
+const new_Empleado = async (req,res) =>{
     try{
         //db.sequelize.authenticate();
-        await db.empleado.create({
+        const empleadoCreado = await db.empleado.create({
             dni: req.body.dni,
+            num_empleado: req.body.num_empleado,
             nombre: req.body.nombre,
             apellido: req.body.apellido,
             direccion: req.body.direccion,
             telefono : req.body.telefono,
-            fechaNacimiento : req.body.fecha_nacimiento,
+            fechaNacimiento : req.body.fechaNacimiento,
             sexo: req.body.sexo,
-            idInstitucion: req.body.idInstitucion
+            idUnidadEjecutora: req.body.idUnidadEjecutora
         });
+        for(let i = 0; i < req.body.list_deptos.length; i++){
+            db.empleado_depto.create({
+                idEmpleado : empleadoCreado.id,
+                idDepto : parseInt(req.body.list_deptos[i])
+            })
+        }
         return res.status(200).json({status:"ok"});
     } catch(error){
         console.log("error: " + error);
@@ -47,18 +55,6 @@ const get_empleados = async (req,res) =>{
             return res.status(404).send({"message":"No se pudo encontrar datos del usuario"})
         }
 
-        // const empleados_deptos = await db.empleado_depto.findAll({
-        //     where:{
-        //         idDepto : req.params.idDepto
-        //     },include:[{model:db.empleado, where:{idUnidadEjecutora:req.usuario.idUE}}]
-        // })
-
-        // const id_empleados = empleados_deptos.map( objeto => objeto.idEmpleado);
-        // empleados = []
-        // for (let index = 0; index < id_empleados.length; index++) {
-        //     empleados.push(await db.empleado.findByPk(id_empleados[index]));
-            
-        // }
         const empleados = await db.empleado.findAll({
             where:{
                 isDelete:false,
@@ -74,9 +70,98 @@ const get_empleados = async (req,res) =>{
     }
 }
 
+const update_empleado = async (req, res) => {
+    try {
+        const temporally = await db.empleado.update({
+            dni: req.body.dni,
+            num_empleado: req.body.num_empleado,
+            nombre: req.body.nombre,
+            apellido: req.body.apellido,
+            direccion: req.body.direccion,
+            telefono : req.body.telefono,
+            fechaNacimiento : req.body.fecha_nacimiento,
+            sexo: req.body.sexo,
+            idInstitucion: req.body.idInstitucion
+        }, {
+            where: {
+                id: req.body.id
+            }
+        });
+        if (temporally) {
+            res.status(200).send({
+                message: "Empleado actualizad con éxito"
+            });
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({status:"Server Error: " + error});
+    }
+}
+
+const disable_empleado = async (req, res) => {
+    try {
+        const temporally = await db.empleado.update({
+            isDelete : true
+        }, {
+            where: {
+                id: req.params.id
+            }
+        });
+        if (temporally) {
+            res.status(200).send({
+                message: "Empleado eliminado con éxito"
+            });
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({status:"Server Error: " + error});
+    }
+}
+
+
+const get_UnidadEjecutora = async (req,res) =>{
+    try{
+        const all_ue = await db.ue.findAll({
+            where: { isDelete: false },
+            include: [{
+                model: db.institucion,
+            }]
+        });
+        if (!all_ue) {
+            return res.status(404).send({ message: 'no hay ningun elemento' });
+        }
+        return res.status(200).json(all_pei);
+    }catch(error){
+        return res.status(500).json({status:"Server Error: " + error});
+}
+}
+
+const get_deptos = async (req,res) =>{
+    try{
+        if(!req.usuario.idUE){
+            return res.status(404).send({"message":"No se pudo encontrar datos del usuario"})
+        }
+        const deptos = await db.depto.findAll({
+            where:{
+                isDelete:false,
+                idUnidadEjecutora:req.usuario.idUE
+            }
+        })
+        if(!deptos){
+            return res.status(400).send("<h1>No existe ni un empleado</h1>");
+        }
+        return res.status(200).json(deptos);
+    }catch(error){
+        return res.status(500).json({status:"Server Error ", error:error});
+    }
+}
 
 module.exports = {
-    new_empleado,
     get_empleado_by_id,
-    get_empleados
+    get_empleados,
+    update_empleado,
+    disable_empleado,
+    get_UnidadEjecutora,
+    get_deptos,
+    new_Empleado
   }
