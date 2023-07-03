@@ -23,7 +23,7 @@ require("./routes/subscription.routes")(app);
 app.use(validarToken,validarSesion);
 
 app.get("/check", (req, res) => {
-  res.json({ message: "¡Bienvenido!" });
+  res.json({ message: "¡Válido!" });
 });
 
 require("./routes/rol.routes")(app);
@@ -88,7 +88,7 @@ app.use(
 
 // database
 const db = require("./models/");
-// db.sequelize.sync();
+//db.sequelize.sync();
 // force: true will drop the table if it already exists
 // db.sequelize.sync({force: false}).then(() => {
 //   init.initial();
