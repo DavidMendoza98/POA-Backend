@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const {secret} = require("../config/auth.config");
 const db = require("../models/");
 
-validarToken = (req, res, next) =>{
+ validarToken = async (req, res, next) =>{
     const token = req.header('Authorization');
   
     // Si no se proporcionó un token, enviar una respuesta de error
@@ -26,7 +26,7 @@ validarToken = (req, res, next) =>{
       res.status(400).json({ mensaje: 'Token no válido.' });
     }
   }
-validarSesion = (req, res, next) =>{
+validarSesion = async (req, res, next) =>{
     // Comprobar si la información de usuario se ha establecido en el objeto de solicitud
     if (!req.usuario) {
       return res.status(401).json({ mensaje: 'Acceso denegado. Falta información de sesión.' });

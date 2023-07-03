@@ -22,6 +22,9 @@ require("./routes/auth.routes")(app);
 require("./routes/subscription.routes")(app);
 app.use(validarToken,validarSesion);
 
+app.get("/check", (req, res) => {
+  res.json({ message: "¡Bienvenido!" });
+});
 
 require("./routes/rol.routes")(app);
 require("./routes/user.routes")(app);

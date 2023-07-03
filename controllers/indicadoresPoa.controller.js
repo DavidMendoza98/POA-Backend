@@ -141,6 +141,44 @@ const AllIndicador_by_idActividad = async (req, res) => {
     })
   }
 };
+const AllIndicador_by_idActividad_for_planificacion = async (req, res) => {
+  try {
+    const allIndicador = await db.indicadoresPoa.findAll({
+      where: {
+        isDelete: false,
+        idActividad: req.params.idActividad
+      }, order: [
+        // will return `createdAt`
+        ['createdAt', 'DESC']]
+    })
+    resultado = [];
+
+    for (const i of allIndicador) {
+      let cantidad_en_planificaciones = await db.planificacion.sum(
+        'cantidad',{
+        where:{
+          isDelete:false,
+          idIndicador:i.id
+        }
+      }
+      )
+      if( !cantidad_en_planificaciones){
+        cantidad_en_planificaciones = 0;
+      }
+      resultado.push({
+        indicador: i,
+        cantidad_asignada:cantidad_en_planificaciones,
+        cantidad_disponible: i.cantidadPlanificada - cantidad_en_planificaciones
+      })
+
+    }
+    res.status(200).json(resultado);
+  } catch (error) {
+    res.status(400).json({
+      message: 'error al ingresar' + error
+    })
+  }
+};
 
 const get_Depto = async (req, res) => {
   try {
@@ -196,6 +234,7 @@ module.exports = {
   deleteIndicador,
   updateIndicador,
   AllIndicador_by_idActividad,
+  AllIndicador_by_idActividad_for_planificacion,
   get_indicador,
   get_Depto,
   seguimiento
