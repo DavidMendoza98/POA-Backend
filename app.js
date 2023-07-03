@@ -25,7 +25,6 @@ app.use(validarToken,validarSesion);
 app.get("/check", (req, res) => {
   res.json({ message: "¡Válido!" });
 });
-/Users/davidmendoza/Projects/POA/Back/POA-Backend/app.js
 require("./routes/rol.routes")(app);
 require("./routes/user.routes")(app);
 require("./routes/empleado.routes")(app);
