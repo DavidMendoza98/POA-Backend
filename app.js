@@ -25,7 +25,7 @@ app.use(validarToken,validarSesion);
 app.get("/check", (req, res) => {
   res.json({ message: "¡Válido!" });
 });
-
+/Users/davidmendoza/Projects/POA/Back/POA-Backend/app.js
 require("./routes/rol.routes")(app);
 require("./routes/user.routes")(app);
 require("./routes/empleado.routes")(app);
@@ -104,7 +104,8 @@ const db = require("./models/");
 //require("./routes/users")(app);
 
 // set port, listen for requests
-const PORT = process.env.PORT || 8080;
+const PORT = 3000;
+//process.env.PORT || 8080
 app.listen(PORT ,() => {
   console.log(`Server is running on port ${PORT}.`);
 });
