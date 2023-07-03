@@ -31,6 +31,23 @@ const new_Empleado = async (req,res) =>{
     }
 }
 
+const newDeptoForEmpleado = async (req, res) =>{
+    try{
+        for(let i = 0; i < req.body.list_deptos.length; i++){
+           db.empleado_depto.create({
+                idEmpleado: req.body.idEmpleado,
+                idDepto : parseInt(req.body.list_deptos[i])
+            });
+        }
+        return res.status(200).json({status:"ok"});
+    } catch(error){
+        console.log("error: " + error);
+        return res.status(400).json({status:"error", error : error});
+    }
+}
+
+
+
 const get_empleado_by_id = async (req,res) =>{
     try{
         const empleado = await db.empleado.findByPk(req.params.id,{
@@ -49,6 +66,7 @@ const get_empleado_by_id = async (req,res) =>{
         return res.status(400).json({status:"Bad Request", error:error});
     }
 }
+
 const get_empleados = async (req,res) =>{
     try{
         if(!req.usuario.idUE){
@@ -79,9 +97,9 @@ const update_empleado = async (req, res) => {
             apellido: req.body.apellido,
             direccion: req.body.direccion,
             telefono : req.body.telefono,
-            fechaNacimiento : req.body.fecha_nacimiento,
+            fechaNacimiento : req.body.fechaNacimiento,
             sexo: req.body.sexo,
-            idInstitucion: req.body.idInstitucion
+            idUnidadEjecutora: req.body.idUnidadEjecutora
         }, {
             where: {
                 id: req.body.id
@@ -89,7 +107,8 @@ const update_empleado = async (req, res) => {
         });
         if (temporally) {
             res.status(200).send({
-                message: "Empleado actualizad con éxito"
+                message: "Empleado actualizad con éxito",
+                empleado: temporally,
             });
         }
     } catch (error) {
@@ -118,23 +137,22 @@ const disable_empleado = async (req, res) => {
     }
 }
 
-
-const get_UnidadEjecutora = async (req,res) =>{
+const getDeptoByIdEmpleado = async (req,res) =>{
     try{
-        const all_ue = await db.ue.findAll({
-            where: { isDelete: false },
-            include: [{
-                model: db.institucion,
-            }]
+        const empDepto = await db.empleado_depto.findAll({
+            where: {
+                idEmpleado: req.params.idEmpleado
+              }
         });
-        if (!all_ue) {
-            return res.status(404).send({ message: 'no hay ningun elemento' });
+        if(!empDepto){
+            return res.status(400).json("<h1>No existe el usuario</h1>");
         }
-        return res.status(200).json(all_pei);
+        return res.status(200).json(empDepto);
     }catch(error){
-        return res.status(500).json({status:"Server Error: " + error});
+        return res.status(500).json({status:"Server Error", error:error});
+    }
 }
-}
+
 
 const get_deptos = async (req,res) =>{
     try{
@@ -156,12 +174,34 @@ const get_deptos = async (req,res) =>{
     }
 }
 
+const get_deptos_by_id_empleado = async(req,res) =>{
+    try{
+        const id_deptos = await db.empleado_depto.findAll({where:{
+            idEmpleado : req.body.idEmpleado
+        }})
+        const deptos = []
+        for(let i = 0; i < id_deptos.length; i++){
+            deptos.push(await db.depto.findOne({where:{id:id_deptos[i].idDepto}}))
+        }
+
+        if(!id_deptos){
+            return res.status(404).send({message:'el el empleado no tiene departamentos'});
+        }
+        return res.status(200).send(deptos);
+    }catch(e){
+        return res.status(500).send({message:'empleado no encontrado'});
+    }
+
+}
+
 module.exports = {
     get_empleado_by_id,
     get_empleados,
     update_empleado,
     disable_empleado,
-    get_UnidadEjecutora,
     get_deptos,
-    new_Empleado
+    new_Empleado,
+    get_deptos_by_id_empleado,
+    getDeptoByIdEmpleado,
+    newDeptoForEmpleado,
   }
