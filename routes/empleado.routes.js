@@ -21,4 +21,6 @@ module.exports = function(app) {
   app.post("/empleado/deptos_by_id_empleado",controller.get_deptos_by_id_empleado);
   app.post("/empleado/addDepto",controller.newDeptoForEmpleado);
   app.get("/empleado/AllEmpleados_responsables_tarea/:idTarea",controller.AllEmpleados_responsables_tarea);
+  app.get("/empleado/deleteDepto/:idEmpleado/:idDepto",controller.deleteDepto);
+
 };
