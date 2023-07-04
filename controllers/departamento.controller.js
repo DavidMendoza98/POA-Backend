@@ -39,6 +39,8 @@ const new_depto = async (req,res) =>{
         await db.depto.create({
             name: req.body.nombre,
             siglas: req.body.siglas,
+            estructura: req.body.estructura,
+            tipo:req.body.tipo,
             idUnidadEjecutora:req.body.idUnidadEjecutora
         });
         return res.status(200).json({status:"Ok"});
@@ -80,7 +82,9 @@ const update_depto = async (req, res) => {
     try {
         const temporally = await db.depto.update({
             name: req.body.nombre,
-            siglas: req.body.siglas
+            siglas: req.body.siglas,
+            estructura: req.body.estructura,
+            tipo:req.body.tipo,
         }, {
             where: {
                 id: req.body.id
