@@ -20,6 +20,6 @@ module.exports = function(app) {
   app.get("/empleado/getDeptos",controller.get_deptos);
   app.post("/empleado/deptos_by_id_empleado",controller.get_deptos_by_id_empleado);
   app.post("/empleado/addDepto",controller.newDeptoForEmpleado);
-  app.get("/empleado/deleteDepto/:idDepto",controller.deleteDepto);
+  app.get("/empleado/deleteDepto/:idEmpleado/:idDepto",controller.deleteDepto);
 
 };

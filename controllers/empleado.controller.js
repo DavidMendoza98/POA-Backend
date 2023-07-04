@@ -200,7 +200,8 @@ const deleteDepto = async(req,res) => {
       // const filaDelete = db.compositor.findOne(el => el.id === id);
       const deleteDepto = await db.empleado_depto.destroy({
         where:{
-          idDepto : req.params.idDepto
+            idEmpleado:req.params.idEmpleado,
+            idDepto : req.params.idDepto
         }
       });
       if(deleteDepto){
