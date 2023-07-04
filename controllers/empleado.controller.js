@@ -194,6 +194,28 @@ const get_deptos_by_id_empleado = async(req,res) =>{
 
 }
 
+const deleteDepto = async(req,res) => {
+    try{
+      // const id = req.params.id * 1;
+      // const filaDelete = db.compositor.findOne(el => el.id === id);
+      const deleteDepto = await db.empleado_depto.destroy({
+        where:{
+          idDepto : req.params.idDepto
+        }
+      });
+      if(deleteDepto){
+    return res.status(200).json({status:"Elemento encontrado", deleteDepto});
+    }else{
+      return res.status(404).json({message:'No se encuentra lo solicitado'});
+    }
+  
+    } catch(error){
+    return res.status(500).json({status:"Server Error: " + error});
+  
+    }
+  }
+
+
 module.exports = {
     get_empleado_by_id,
     get_empleados,
@@ -204,4 +226,5 @@ module.exports = {
     get_deptos_by_id_empleado,
     getDeptoByIdEmpleado,
     newDeptoForEmpleado,
+    deleteDepto
   }
