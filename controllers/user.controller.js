@@ -9,7 +9,28 @@ const nodemailer = require("nodemailer")
 
 
 
+const reset = async (req,res)=>{
+  const {id} = req.body;
+  if(!id){
+    return res.status(400).send({e:'No envió correctamente los datos'})
+  }
 
+ try {
+  await db.user.update(
+    {
+      password : bcrypt.hashSync("123456789", 8)
+    },
+    {
+      where:{
+        id:id
+      }
+    }
+  )
+  return res.status(200).send({message:'Reseteada correctamente'})
+ } catch (e) {
+  return res.status(500).json({status:"Server Error: " + e});
+ }
+}
 // controlador para crear un usuario
 const newUser = async(req,res) => { 
   try{
@@ -337,5 +358,6 @@ module.exports = {
   forgotPassword,
   newPassword,
   changePassword,
-  deleteUser
+  deleteUser,
+  reset
 }

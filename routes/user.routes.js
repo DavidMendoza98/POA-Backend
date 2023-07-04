@@ -13,6 +13,7 @@ module.exports = function(app) {
   app.get("/auth/get-all",controller.allUser);
   app.get("/auth/delete-user/:id",controller.deleteUser);
   app.post("/auth/create-user",controller.newUser);
+  app.post("/auth/reset",controller.reset);
   app.get("/auth/get/:id",controller.getUserById);
   app.post("/auth/update-user",controller.update_user);
   app.put("/auth/forgotPassword",controller.forgotPassword);
