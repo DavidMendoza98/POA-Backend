@@ -12,6 +12,7 @@ module.exports = function(app) {
   app.get("/techo_ue/get_monto_min_for_update_techo_ue/:idTechoUE",controller.get_monto_min_for_update_techo_ue)
   app.get("/techo_ue/get_monto_max_for_update_techo_ue/:idTechoUE",controller.get_monto_max_for_update_techo_ue)
   app.get("/techo_ue/get_monto_min_for_update_techo_depto/:idTechoDepto/:idFuente/:idGrupo",controller.get_monto_min_for_update_techo_depto)
+  app.get("/techo_ue/get_monto_max_for_update_techo_depto/:idPresupuesto",controller.get_monto_max_for_update_tarea)
   app.get("/techo_ue/get_all_for_create_techo_depto/:idPoa",controller.get_techos_ue_for_create_techo_depto);
   app.get("/techo_depto/get_techos_depto_by_poa_y_depto/:idPoa/:idDepto",controller.get_techos_depto_by_poa_y_depto);
   app.get("/techo_depto/get_techo_by_idObjetoGasto/:idObjetoGasto/:idActividad",controller.get_techo_by_id_objeto_gasto);

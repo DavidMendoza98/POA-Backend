@@ -409,6 +409,77 @@ const get_monto_min_for_update_techo_depto = async (req,res)=>{
         return res.status(500).send({ "message": 'Error al obtener el monto máximo disponible para ese techo presupuestario '});
     }
 }
+const get_monto_max_for_update_tarea = async (req,res)=>{
+    try {
+        const {idPresupuesto} = req.params;
+        // validaciones
+        if (!idPresupuesto) {
+            return res.status(400).send({ "message": "Error al encontrar los datos" })
+        }
+        const presupuesto = await db.presupuesto.findByPk(idPresupuesto);
+        if (!presupuesto) {
+            return res.status(404).send({ "message": "Error al encontrar los datos" });
+        }
+        const tarea = await db.tarea.findByPk(presupuesto.idtarea);
+        if (!tarea) {
+            return res.status(404).send({ "message": "Error al encontrar los datos" });
+        }
+        const actividad = await db.actividad.findByPk(tarea.idActividad);
+        if (!actividad) {
+            return res.status(404).send({ "message": "Error al encontrar los datos" });
+        }
+        // obtener las actividades
+        let idActividades = await db.actividad.findAll({
+            atributes:['id'],
+            where:{
+                isDelete:false,
+                idPoaDepto: actividad.idPoaDepto
+            }
+        })
+        const techo = await db.poa_depto.findOne({
+            where:{
+                isDelete:false,
+                idPoaDepto:actividad.idPoaDepto,
+                idFuente:presupuesto.idfuente,
+                idGrupo:presupuesto.idgrupo
+            }})
+        if (!techo) {
+            return res.status(404).send({ "message": "Error al encontrar los datos" });
+        }
+        
+        idActividades = idActividades.map(item => item.id);
+
+        // obtener las tareas
+        let idTareas = await db.tarea.findAll({
+            atributes:['id'],
+            where:{
+                isDelete:false,
+                idActividad: {[Op.in]:  idActividades}
+            }
+        })
+
+        idTareas = idTareas.map(item => item.id);
+
+        // sumar los presupuestos de las tareas
+        let montoMin = await db.presupuesto.sum('total',{
+            where:{
+                isDelete:false,
+                idtarea: {[Op.in]:  idTareas},
+                idfuente:fuente.id,
+                idgrupo:grupogasto.id
+            }
+        })
+        if(montoMin === null){
+            montoMin = 0;
+        }
+        const max = techo.monto - montoMin;
+        return res.status(200).send({'max':max})
+        
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({ "message": 'Error al obtener el monto máximo disponible para ese techo presupuestario '});
+    }
+}
 const get_techos_depto_by_idPoaDepto = async (req, res) => {
     try {
         if (!req.params.idPoaDepto) {
@@ -508,5 +579,6 @@ module.exports = {
     update_techo_depto,
     get_techo_by_id_objeto_gasto,
     get_monto_min_for_update_techo_depto,
+    get_monto_max_for_update_tarea,
     get_techos_depto_by_idPoaDepto
 }

@@ -136,26 +136,19 @@ const updateTarea = async (req, res) => {
     }
     const updatetarea = await db.tarea.update({
       nombre: req.body.nombre,
-      descripcion: req.body.descripcion,
-      isPresupuesto: req.body.isPresupuesto,
-      idActividad: actividad.id
+      descripcion: req.body.descripcion
     }, {
       where: {
         id: tareas.id
       }
     });
     console.log(tareas.isPresupuesto)
-    if (tareas.isPresupuesto == true) {
-      const objeto = await db.objetogasto.findByPk(req.body.idobjeto)
+    if (tareas.isPresupuesto) {
 
       update_presupuesto = await db.presupuesto.update({
         cantidad: req.body.cantidad,
         costounitario: req.body.costounitario,
         total: req.body.total,
-        idobjeto: objeto.id,
-        idgrupo: objeto.idgrupo,
-        idtarea: updateTarea.id,
-        idfuente: req.body.idfuente,
         idunidad: req.body.idunidad
       }, {
         where: {
@@ -165,8 +158,8 @@ const updateTarea = async (req, res) => {
     }
     if (updatetarea) {
       res.status(200).send({
-        message: "Objetivo actualizado con éxito",
-        resultado: updatetarea
+        message: "Tarea actualizada con éxito",
+        updatetarea
 
       });
     }

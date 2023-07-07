@@ -19,7 +19,8 @@ const new_Empleado = async (req,res) =>{
             sexo: req.body.sexo,
             idUnidadEjecutora: req.body.idUnidadEjecutora
         });
-        for(let i = 0; i < req.body.list_deptos.length; i++){
+        const deptos = JSON.parse(req.body.list_deptos);
+        for(let i = 0; i < deptos.length; i++){
             db.empleado_depto.create({
                 idEmpleado : empleadoCreado.id,
                 idDepto : parseInt(req.body.list_deptos[i])
@@ -34,16 +35,30 @@ const new_Empleado = async (req,res) =>{
 
 const newDeptoForEmpleado = async (req, res) =>{
     try{
-        for(let i = 0; i < req.body.list_deptos.length; i++){
-           db.empleado_depto.create({
+        const deptos = JSON.parse(req.body.list_deptos);
+        console.log('#####################################: ',deptos);
+        for (const i of deptos) {
+            let posibleEntrada = await db.empleado_depto.findOne(
+                {
+                    where:{
+                        idEmpleado: req.body.idEmpleado,
+                        idDepto : i
+                    }
+                }
+            )
+            if(posibleEntrada){
+                continue;
+            }
+           await db.empleado_depto.create({
                 idEmpleado: req.body.idEmpleado,
-                idDepto : parseInt(req.body.list_deptos[i])
+                idDepto : i
             });
+            
         }
         return res.status(200).json({status:"ok"});
     } catch(error){
         console.log("error: " + error);
-        return res.status(400).json({status:"error", error : error});
+        return res.status(500).json({status:"error", error : error});
     }
 }
 
@@ -77,7 +92,10 @@ const get_empleados = async (req,res) =>{
         const empleados = await db.empleado.findAll({
             where:{
                 isDelete:false,
-                idUnidadEjecutora:req.usuario.idUE
+                idUnidadEjecutora:req.usuario.idUE,
+                id : {
+                    [Op.ne]:1
+                } 
             }
         })
         if(!empleados){
@@ -195,6 +213,88 @@ const get_deptos_by_id_empleado = async(req,res) =>{
 
 }
 const AllEmpleados_responsables_tarea = async (req,res)=>{
+    try {
+        const {id} = req.params;
+
+        if(!id){
+            return res.status(400).send('No envió todos los datos')
+        }
+
+        let empleado_tareas = await db.tarea_encargado.findAll({
+            where:{
+                isDelete:false,
+                idTarea:id
+            }
+        });
+
+        let empleados = empleado_tareas.map((item)=> item.idEmpleado);
+
+        const empleados_list = await db.empleado.findAll({
+            where:{
+                isDelete:false,
+                id : {
+                    [Op.in]:empleados,
+                    [Op.ne]:1
+                }
+            }
+        })
+        return res.status(200).send(empleados_list);
+
+    } catch (error) {
+        return res.status(500).send({message:'empleado no encontrado'});
+    }
+}
+const addEmpleado_Tarea = async (req,res)=>{
+    const {idEmpleado,idTarea} = req.body;
+    if(!idEmpleado){
+        return res.status(404).send({"message":"No se envio todos los datos"})
+    }
+    if(!idTarea){
+        return res.status(404).send({"message":"No se envio todos los datos"})
+    }
+    try {
+        const tarea = await db.tarea.findByPk(idTarea);
+        const registro = await db.tarea_encargado.create({
+            idEmpleado,
+            idTarea,
+            idActividad:tarea.idActividad
+        })
+
+        return res.status(200).send(registro);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({message:'Error al registrar'});
+    }
+}
+
+const eliminarEmpleado_Tarea = async (req,res)=>{
+    const {idEmpleado, idTarea} = req.body;
+    if(!idEmpleado){
+        return res.status(400).send('No envió todos los datos');
+    }
+    if(!idTarea){
+        return res.status(400).send('No envió todos los datos');
+    }
+    console.log(`#############`);
+
+    try {
+        const update = await db.tarea_encargado.update({
+            isDelete: true
+        },{
+            where:{
+                idEmpleado:idEmpleado,
+                idTarea:idTarea
+            }
+        })
+        if(!update){
+            return res.status(400).send('No se elimino');
+        }
+
+        return res.status(200).send(update);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({message:'Error al registrar'});
+    }
 }
 
 
@@ -232,5 +332,7 @@ module.exports = {
     getDeptoByIdEmpleado,
     newDeptoForEmpleado,
     deleteDepto,
-    AllEmpleados_responsables_tarea
+    AllEmpleados_responsables_tarea,
+    addEmpleado_Tarea,
+    eliminarEmpleado_Tarea
   }
