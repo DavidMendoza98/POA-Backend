@@ -130,10 +130,15 @@ const eliminarTarea = async (req, res) => {
 const updateTarea = async (req, res) => {
   try {
     const tareas = await db.tarea.findByPk(req.body.id);
+    if (!tareas) {
+      res.status(404).send({ message: 'no se encontro la tarea' });
+    }
+
     const actividad = await db.actividad.findByPk(req.body.idActividad);
     if (!actividad) {
       res.status(404).send({ message: 'no se encontro la actividad' });
     }
+
     const updatetarea = await db.tarea.update({
       nombre: req.body.nombre,
       descripcion: req.body.descripcion
@@ -142,17 +147,17 @@ const updateTarea = async (req, res) => {
         id: tareas.id
       }
     });
-    console.log(tareas.isPresupuesto)
-    if (tareas.isPresupuesto) {
 
-      update_presupuesto = await db.presupuesto.update({
+    
+    if (tareas.isPresupuesto) {
+      await db.presupuesto.update({
         cantidad: req.body.cantidad,
         costounitario: req.body.costounitario,
         total: req.body.total,
         idunidad: req.body.idunidad
       }, {
         where: {
-          idP: req.body.id
+          idtarea: tareas.id
         }
       })
     }

@@ -66,6 +66,7 @@ db.techo_depto = require("./techo_depto.model.js")(sequelize,Sequelize)
 // modelos para actividad (pertenecen a un poa_depto)
 db.actividad = require("./actividad.model.js")(sequelize, Sequelize);
 db.tipo_actividad = require("./tipo_actividad.model")(sequelize, Sequelize);
+db.categoria = require("./categoria.model")(sequelize, Sequelize);
 db.ACencargados = require("./actividadEncargado.model.js")(sequelize, Sequelize);
 
 // modelos relacionados con actividad
@@ -708,6 +709,15 @@ db.tipo_actividad.hasMany(db.actividad, {
 });
 db.actividad.belongsTo(db.tipo_actividad, {
   foreignKey: { name: 'idTipo', 
+  allowNull: false }
+});
+
+db.categoria.hasMany(db.actividad, {
+  foreignKey: {name : 'idCategoria' , 
+  allowNull: false }
+});
+db.actividad.belongsTo(db.categoria, {
+  foreignKey: { name: 'idCategoria', 
   allowNull: false }
 });
 ////////////// RELACIONES DE POA Y Fuente /////////

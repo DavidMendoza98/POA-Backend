@@ -29,10 +29,6 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.ENUM('FORMULACION', 'REFORMULACION', 'REVISION', 'APROBADO', 'RECHAZADO',),
             allowNull: false,
         },
-        categoria: {
-            type: Sequelize.ENUM('PROGRAMAS/PROYECTOS', 'OPERACIONES'),
-            allowNull: false,
-        },
 
         isActive: {
             type: Sequelize.BOOLEAN,
