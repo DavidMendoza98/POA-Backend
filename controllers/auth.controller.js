@@ -9,7 +9,7 @@ const login = async (req, res) => {
     //return res.status(200);
     try {
         // obtener usuario de la bd
-        const user = await User.findOne({
+        let user = await User.findOne({
             where: {
                 username: req.body.username,
                 isDelete: false
@@ -25,6 +25,44 @@ const login = async (req, res) => {
             }]
         });
 
+        if(!user){
+            user = await User.findOne({
+                where: {
+                    email: req.body.username,
+                    isDelete: false
+                },
+                include: [{
+                    model: db.role,
+                }, {
+                    model: db.empleado, include: [{
+                        model: db.ue, include: [{
+                            model: db.institucion
+                        }]
+                    }]
+                }]
+            }); 
+        }
+
+        if(!user){
+            user = await User.findOne({
+                where: {
+                    isDelete: false
+                },
+                include: [{
+                    model: db.role,
+                }, {
+                    model: db.empleado,
+                        where:{
+                            num_empleado:req.body.username
+                        },
+                        include: [{
+                        model: db.ue, include: [{
+                            model: db.institucion
+                        }]
+                    }]
+                }]
+            });
+        }
         // 404 si no hay usuario con el id proporcionado
         if (!user) {
             return res.status(404).send({

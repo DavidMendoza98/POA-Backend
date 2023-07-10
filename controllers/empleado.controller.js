@@ -20,11 +20,12 @@ const new_Empleado = async (req,res) =>{
             idUnidadEjecutora: req.body.idUnidadEjecutora
         });
         const deptos = JSON.parse(req.body.list_deptos);
-        for(let i = 0; i < deptos.length; i++){
-            db.empleado_depto.create({
-                idEmpleado : empleadoCreado.id,
-                idDepto : parseInt(req.body.list_deptos[i])
-            })
+        for (const i of deptos) {
+           await db.empleado_depto.create({
+                idEmpleado: empleadoCreado.id,
+                idDepto : i
+            });
+            
         }
         return res.status(200).json({status:"ok"});
     } catch(error){
@@ -36,7 +37,6 @@ const new_Empleado = async (req,res) =>{
 const newDeptoForEmpleado = async (req, res) =>{
     try{
         const deptos = JSON.parse(req.body.list_deptos);
-        console.log('#####################################: ',deptos);
         for (const i of deptos) {
             let posibleEntrada = await db.empleado_depto.findOne(
                 {
