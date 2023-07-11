@@ -52,14 +52,14 @@ const newActividad = async (req, res) => {
             poblacion_objetivo: req.body.poblacion_objetivo,
             medio_verificacion: req.body.medio_verificacion,
             estado: "FORMULACION",
-            categoria: req.body.categoria,
             idPoa: poa.id,
             idPoaDepto: poaDepto.id,
             idDepto:poaDepto.idDepto,
             idInstitucion: poa.idInstitucion,
             idUE: poa.idUE,
             idTipo:req.body.idTipo,
-            idResultado:req.body.idResultado
+            idResultado:req.body.idResultado,
+            idCategoria: req.body.idCategoria,
         });
         await db.ACencargados.create({
                idActividad: actividadCreada.id,
@@ -158,7 +158,7 @@ const updateActividad = async (req, res) => {
         if (!req.body.idTipo) {
             return res.status(400).json({ message: 'Debe enviar todos los datos tipo' });
         }
-        if (!req.body.categoria) {
+        if (!req.body.idCategoria) {
             return res.status(400).json({ message: 'Debe enviar todos los datos categoria' });
         }
         
@@ -170,9 +170,9 @@ const updateActividad = async (req, res) => {
                 resultadoActividad:req.body.resultadoActividad,
                 poblacion_objetivo: req.body.poblacion_objetivo,
                 medio_verificacion: req.body.medio_verificacion,
-                categoria: req.body.categoria,
                 idTipo:req.body.idTipo,
-                idResultado:req.body.idResultado
+                idResultado:req.body.idResultado,
+                idCategoria: req.body.idCategoria,
             },
             { where: { id: req.body.id } });
 
