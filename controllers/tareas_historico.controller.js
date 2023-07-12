@@ -42,7 +42,7 @@ const create = async(req,res) =>{
 
     const objeto = await db.objetogasto.findOne({
       where:{
-        id:idobjeto
+        identificador:idobjeto
       }, 
       include : db.grupogasto
     });
