@@ -11,5 +11,6 @@ module.exports = function(app) {
     next();
   });
   app.get("/tareah/get_all", controller.AllTareasH);
+  app.post("/tareah/create",controller.create);
 
 }

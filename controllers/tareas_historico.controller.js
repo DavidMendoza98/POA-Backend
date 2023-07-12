@@ -27,6 +27,51 @@ const AllTareasH = async(req,res) => {
   }
   };
 
+const create = async(req,res) =>{
+  try {
+    const {nombre,idobjeto,idunidad} = req.body;
+    if(!nombre){
+      return res.status(400).send('No envió el nombre');
+    }
+    if(!idobjeto){
+      return res.status(400).send('No envió el id del objeto');
+    }
+    if(!idunidad){
+      return res.status(400).send('No envió el id del grupo');
+    }
+
+    const objeto = await db.objetogasto.findOne({
+      where:{
+        id:idobjeto
+      }, 
+      include : db.grupogasto
+    });
+    if(!objeto){
+      return res.status(404).send('No se encontró el objeto del gasto');
+    }
+    const unidad = await db.unidadmedida.findByPk(idunidad);
+    if(!unidad){
+      return res.status(404).send('No se encontró la unidad');
+    }
+
+    const historico = await db.tareas_historico.create({
+      nombre:nombre,
+      idobjeto:objeto.id,
+      objeto:objeto.nombre,
+      idgrupo:objeto.idgrupo,
+      grupo:objeto.grupogasto.nombre,
+      idunidad:unidad.id,
+      unidad:unidad.nombre
+    })
+
+    return res.status(200).send(historico);    
+
+  } catch (error) {
+    return res.status(500).send(error);
+  }
+} 
+
   module.exports = {
-    AllTareasH
+    AllTareasH,
+    create
 }
