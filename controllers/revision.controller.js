@@ -343,6 +343,15 @@ const newRevision = async (req, res) => {
                 id:req.body.idActividad
             }
         })
+
+        await db.evento.create({
+            evento:'Ha realizado una observación en esta actividad',
+            tipo:'REFORMULACION',
+            fecha: new Date(Date.now()),
+            idUser: req.usuario.idUsuario,
+            idActividad:req.body.idActividad
+        })
+
         res.status(200).json({
             message: 'revision creada con éxito'
         })

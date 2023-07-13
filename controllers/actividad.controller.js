@@ -273,6 +273,36 @@ const setEstadoDeActividad = async (req, res) => {
                 estado: req.body.estado
             },
             { where: { id: req.body.id } });
+        
+            switch (req.body.estado) {
+                case 'REVISION':
+                    await db.evento.create({
+                        evento:'Ha finalizado una actividad, ya puede ser revisada.',
+                        tipo:'REVISION',
+                        fecha: new Date(Date.now()),
+                        idUser: req.usuario.idUsuario,
+                        idActividad:req.body.id
+                    })
+                  break;
+                case 'APROBADO':
+                    await db.evento.create({
+                        evento:'Esta actividad se ha aprobado.',
+                        tipo:'APROBADO',
+                        fecha: new Date(Date.now()),
+                        idUser: req.usuario.idUsuario,
+                        idActividad:req.body.id
+                    })
+                  break;
+                case 'RECHAZADO':
+                    await db.evento.create({
+                        evento:'Esta actividad se ha rechazado.',
+                        tipo:'RECHAZADO',
+                        fecha: new Date(Date.now()),
+                        idUser: req.usuario.idUsuario,
+                        idActividad:req.body.id
+                    })
+                  break;
+              }
 
         if (temporally) {
             res.status(200).send({
