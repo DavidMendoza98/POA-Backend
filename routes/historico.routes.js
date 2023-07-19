@@ -11,6 +11,9 @@ module.exports = function(app) {
 
   app.get("/historico/search/:search/:limit",controller.get_historico);
   app.get("/historico/limit/:limit",controller.get_historico_limit);
+  app.get("/historico/get_all",controller.get_all_historico);
+  app.put("/historico/delete",controller.deleteHistorico);
+  app.post("/historico/create",controller.create);
 };
 
 
