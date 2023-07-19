@@ -14,6 +14,7 @@ module.exports = function(app) {
   app.get("/historico/get_all",controller.get_all_historico);
   app.put("/historico/delete",controller.deleteHistorico);
   app.post("/historico/create",controller.create);
+  app.put("/historico/update",controller.update);
 };
 
 

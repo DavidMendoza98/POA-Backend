@@ -129,10 +129,43 @@ const create = async (req,res)=>{
  }
 }
 
+const update = async (req,res)=>{
+  try {
+     const {id,nombre,idObjeto,idUnidad} = req.body;
+     if(!nombre){
+       return res.status(400).send('No envió el nombre del recurso');
+     }
+     if(!idObjeto){
+       return res.status(400).send('No envió el id del objeto gasto');
+     }
+     if(!idUnidad){
+       return res.status(400).send('No envió el id de la unidad de medida');
+     }
+     if(!id){
+      return res.status(400).send('No envió el id del historico');
+    }
+ 
+     const historico = await db.tareas_historico.update({
+       nombre:nombre,
+       idobjeto:idObjeto,
+       idunidad:idUnidad
+     },{
+      where:{
+        id:id
+      }
+     })
+     return res.status(200).send(historico);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send(error);
+  }
+ }
+
 module.exports = {
   get_historico,
   get_historico_limit,
   get_all_historico,
   deleteHistorico,
-  create
+  create,
+  update
 }

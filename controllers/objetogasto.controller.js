@@ -49,20 +49,38 @@ const AllObjeto = async(req,res) => {
   const newObjetogasto = async (req,res) =>{
     try{
         //db.sequelize.authenticate();
+        const {nombre,descripcion,identificador,idGrupo} = req.body;
+        if(!nombre){
+          return res.status(400).send('No envió el nombre del objeto')
+        }
+        if(!descripcion){
+          return res.status(400).send('No envió la descripcion del objeto')
+        }
+        if(!identificador){
+          return res.status(400).send('No envió el identificador del objeto')
+        }
+        if(!idGrupo){
+          return res.status(400).send('No envió el id de grupo del objeto')
+        }
+        
         db.objetogasto.create({
-            nombre: req.body.nombre,
-            identificador: req.body.identificador,
-            idgrupo: req.body.idgrupo
+            nombre: nombre,
+            descripcion: descripcion,
+            identificador: identificador,
+            idgrupo: idGrupo
         });
         return res.status(200).json({status:"ok"});
     } catch(error){
         console.log("error: " + error);
-        return res.status(400).json({status:"error", error : error});
+        return res.status(500).json({status:"error", error : error});
     }
 } 
 
 const eliminarObjeto = async (req, res) => {
   try {
+    if(!req.params.id){
+      return res.status(400).send('No envió el id del objeto')
+    }
     const objetoUpdate = await db.objetogasto.update({
         isDelete: true
   },{
@@ -86,15 +104,30 @@ const eliminarObjeto = async (req, res) => {
 
 const updateObjeto = async(req, res) =>{
   try {
-    if(!req.body.nombre){
-        return res.status(400).json({message:'Debe enviar todos los datos'});
+    const {id,nombre,descripcion,identificador,idGrupo} = req.body;
+    if(!id){
+      return res.status(400).send('No envió el id del objeto')
     }
+        if(!nombre){
+          return res.status(400).send('No envió el nombre del objeto')
+        }
+        if(!descripcion){
+          return res.status(400).send('No envió la descripcion del objeto')
+        }
+        if(!identificador){
+          return res.status(400).send('No envió el identificador del objeto')
+        }
+        if(!idGrupo){
+          return res.status(400).send('No envió el id de grupo del objeto')
+        }
     const updateObjeto = await db.objetogasto.update({
-        nombre: req.body.nombre,
-        identificador: req.body.descripcion,
+        nombre: nombre,
+        descripcion:descripcion,
+        identificador: identificador,
+        idgrupo:idGrupo
     }, {
         where: {
-            id: req.body.id
+            id: id
         }
     });
     if (updateObjeto) {
