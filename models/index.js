@@ -58,6 +58,7 @@ db.poa_depto = require("./poa-depto.model.js")(sequelize, Sequelize);
 // modelos para techos presupuestario de los poas
 db.fuente = require("./fuente.model.js")(sequelize, Sequelize);
 db.grupogasto= require("./grupogasto.model.js")(sequelize, Sequelize);
+db.cuentas_mayores = require("./cuentasmayores.model.js")(sequelize,Sequelize);
 db.objetogasto= require("./objetogasto.model.js")(sequelize, Sequelize);
 
 db.techo_ue = require("./techo_ue.model.js")(sequelize,Sequelize)
@@ -556,6 +557,26 @@ db.objetogasto.belongsTo(db.grupogasto, {
   foreignKey: { name: 'idgrupo', allowNull: false }
 });
 
+db.grupogasto.hasMany(db.cuentas_mayores, {
+  foreignKey: { name: 'idGrupo', allowNull: false }
+});
+db.cuentas_mayores.belongsTo(db.grupogasto, {
+  foreignKey: { name: 'idGrupo', allowNull: false }
+});
+
+db.objetogasto.hasMany(db.tareas_historico, {
+  foreignKey: { name: 'idobjeto', allowNull: false }
+});
+db.tareas_historico.belongsTo(db.objetogasto, {
+  foreignKey: { name: 'idobjeto', allowNull: false }
+});
+db.unidadmedida.hasMany(db.tareas_historico, {
+  foreignKey: { name: 'idobjeto', allowNull: false }
+});
+db.tareas_historico.belongsTo(db.unidadmedida, {
+  foreignKey: { name: 'idunidad', allowNull: false }
+});
+
 /////////////////////////////////////////
 ////// RELACION DE UNO A MUCHOS /////////
 /* UN PRESUPUESTO TIENE UN GRUPO DEL GASTO, UN GRUPO DEL GASTO MUCHOS
@@ -566,6 +587,13 @@ db.grupogasto.hasMany(db.presupuesto, {
 });
 db.presupuesto.belongsTo(db.grupogasto, {
   foreignKey: { name: 'idgrupo', allowNull: false }
+});
+
+db.tareas_historico.hasMany(db.presupuesto, {
+  foreignKey: { name: 'idHistorico', allowNull: false }
+});
+db.presupuesto.belongsTo(db.tareas_historico, {
+  foreignKey: { name: 'idHistorico', allowNull: false }
 });
 /////////////////////////////////////////
 ////// RELACION DE UNO A MUCHOS /////////

@@ -14,6 +14,7 @@ module.exports = function(app) {
   app.get("/presupuesto/eliminar/:id",controller.deletePresupuesto);
   app.post("/presupuesto/crear",controller.newPresupuesto);
   app.put("/presupuesto/actualizar",controller.updatePresupuesto);
+  app.put("/presupuesto/actualizar_parcial",controller.update_parcial_Presupuesto);
   app.get("/presupuesto/presupuesto_by_idtarea/:idtarea", controller.presupuesto_by_idTarea)
   // app.get("/presupuesto/prueba", controller.probando_like)
 };

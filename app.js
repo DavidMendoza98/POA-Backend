@@ -62,6 +62,7 @@ require("./routes/ue_presupuesto.routes")(app)
 require('./routes/medioVerificacion.routes')(app)
 require('./routes/categoria.routes')(app)
 require('./routes/tipo_actividad.routes')(app)
+require('./routes/historico.routes')(app);
 
 app.use(
   cookieSession({

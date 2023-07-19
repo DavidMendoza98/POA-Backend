@@ -17,6 +17,16 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.DECIMAL(10, 2),
             allowNull: false
         },
+        detalle_tecnico:{
+            type: Sequelize.TEXT,
+            allowNull: false,
+            defaultValue: false
+        },
+        recurso:{
+            type: Sequelize.TEXT,
+            allowNull: false,
+            defaultValue: false
+        },
         isDelete: {
             type: Sequelize.BOOLEAN,
             allowNull: false,

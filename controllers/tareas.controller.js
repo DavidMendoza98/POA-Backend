@@ -45,8 +45,7 @@ const AllTareas_by_id = async (req, res) => {
 // Tercero Listo
 const newTarea = async (req, res) => {
   try {
-    //db.sequelize.authenticate();
-    //isPresupuesto: boolean
+
     const actividad = await db.actividad.findByPk(req.body.idActividad);
     if (!actividad) {
       res.status(404).send({ message: 'no se encontro la actividad' });
@@ -61,7 +60,7 @@ const newTarea = async (req, res) => {
     const correlativo = actividad.correlativo + cantidadTareas.toString();
     const tareaCreada = await db.tarea.create({
       nombre: req.body.nombre,
-      descripcion: req.body.descripcion,
+      descripcion: ' ',
       correlativo:correlativo,
       estado:'REVISION',
       isPresupuesto: req.body.isPresupuesto,
@@ -71,18 +70,26 @@ const newTarea = async (req, res) => {
       idUE: actividad.idUE
     });
     if (tareaCreada.isPresupuesto == true) {
-      const objeto = await db.objetogasto.findByPk(req.body.idobjeto)
-      db.presupuesto.create({
-        cantidad: req.body.cantidad,
-        costounitario: req.body.costounitario,
-        total: req.body.total,
+      const presupuestos = JSON.parse(req.body.presupuestos);
+      for (const i of presupuestos) {
+        const objeto = await db.objetogasto.findByPk(i.historico.objetogasto.id)
+        const total = parseFloat(i.cantidad) * parseFloat(i.costo);
+      await db.presupuesto.create({
+        recurso:i.historico.nombre,
+        detalle_tecnico:i.detalle_tecnico,
+        cantidad: i.cantidad,
+        costounitario: i.costo,
+        total: total,
         idobjeto: objeto.id,
         idgrupo: objeto.idgrupo,
         idtarea: tareaCreada.id,
-        idfuente: req.body.idfuente,
-        idMes: req.body.idMes,
-        idunidad: req.body.idunidad
+        idfuente: i.techo.techo.techo_ue.fuente.id,
+        idMes: parseInt(i.mes),
+        idunidad: parseInt(i.unidad),
+        idHistorico:i.historico.id
       })
+      }
+      
     }
 
     const encargados = JSON.parse(req.body.encargados);
@@ -97,13 +104,11 @@ const newTarea = async (req, res) => {
         )
       }
     }
-    // console.log(tareaCreada)
-    // console.log("ksdjfkjsfksjkdfjk")
 
-    return res.status(200).json({ status: "ok" });
+    return res.status(200).send(tareaCreada);
   } catch (error) {
     console.log("error: " + error);
-    return res.status(400).json({ status: "error", error: error });
+    return res.status(500).json({ status: "error", error: error });
   }
 }
 const eliminarTarea = async (req, res) => {
@@ -175,6 +180,36 @@ const updateTarea = async (req, res) => {
   }
 
 };
+const updateNombreTarea = async (req, res) => {
+  try {
+    const {id,nombre} = req.body;
+    if(!id){
+      return res.status(400).send("No envió el id de la tarea a actualizar")
+    }
+    if(!nombre){
+      return res.status(400).send("No envió el nombre de la tarea a actualizar")
+    }
+    const updatetarea = await db.tarea.update({
+      nombre: nombre
+    }, {
+      where: {
+        id: id
+      }
+    });
+    if (updatetarea) {
+      res.status(200).send({
+        message: "Tarea actualizada con éxito",
+        updatetarea
+
+      });
+    }
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ status: "Server Error: " + error });
+  }
+
+};
 const probando_like = async (req, res) => {
   try {
     const tarea = await db.tareas_historico.findOne({
@@ -217,8 +252,8 @@ const AllTarea_by_idActividad = async (req, res) => {
         isDelete: false,
         idActividad: req.params.idActividad
       },
-      include: [{ model: db.actividad }, { model: db.presupuesto, include: [{ model: db.grupogasto }, { model: db.objetogasto }, { model: db.unidadmedida }, { model: db.fuente }] }
-      ], order: [
+      include: [{ model: db.actividad }] 
+      , order: [
         // will return `name`
         ['createdAt', 'DESC']]
 
@@ -235,10 +270,20 @@ const AllTarea_by_idActividad = async (req, res) => {
           }
         }
       )
+      let presupuestos = await db.presupuesto.findAll(
+        {
+          where: {
+            isDelete:false,
+            idtarea: i.id,
+          },
+          include: [{ model: db.grupogasto }, { model: db.objetogasto }, { model: db.unidadmedida }, { model: db.fuente },{model:db.tareas_historico}]
+        }
+      )
       result.push({
         tarea: i,
         isRevision: revisiones.length > 0 ? true : false,
-        revisiones: revisiones
+        revisiones: revisiones,
+        presupuestos:presupuestos
       })
 
     }
@@ -430,6 +475,7 @@ module.exports = {
   AllTareas,
   AllTareas_by_id,
   updateTarea,
+  updateNombreTarea,
   eliminarTarea,
   newTarea,
   probando_like,

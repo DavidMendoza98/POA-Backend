@@ -90,23 +90,42 @@ const presupuesto_by_idTarea = async(req,res) => {
 
   const newPresupuesto = async (req, res) => {
     try{
-      const objeto= await db.objetogasto.findByPk(req.body.idobjeto)
-    await db.presupuesto.create({
-        cantidad: req.body.cantidad,
-        costounitario: req.body.costounitario,
-        total:req.body.total,
+      const i = JSON.parse(req.body.presupuesto);
+      const id = req.body.id;
+      if(!i){
+        return res
+      }
+
+      const objeto = await db.objetogasto.findByPk(i.historico.objetogasto.id)
+      const total = parseFloat(i.cantidad) * parseFloat(i.costo);
+      await db.presupuesto.create({
+        recurso:i.historico.nombre,
+        detalle_tecnico:i.detalle_tecnico,
+        cantidad: i.cantidad,
+        costounitario: i.costo,
+        total: total,
         idobjeto: objeto.id,
         idgrupo: objeto.idgrupo,
-        idtarea: req.body.idtarea,
-        idfuente: req.body.idfuente,
-        idunidad: req.body.idunidad
+        idtarea: id,
+        idfuente: i.techo.techo.techo_ue.fuente.id,
+        idMes: parseInt(i.mes),
+        idunidad: parseInt(i.unidad),
+        idHistorico:i.historico.id
       })
+
+      await db.tarea.update({
+        isPresupuesto:true
+      }, {
+        where:{
+          id:id
+      }
+    })
       res.status(200).json({
-        message: 'usuario creado con exito'
+        message: 'Recurso creado con éxito'
       })
   
     } catch (error) {
-      res.status(400).json({
+      res.status(500).json({
         message: 'error al ingresar' + error
       })
     }
@@ -114,22 +133,25 @@ const presupuesto_by_idTarea = async(req,res) => {
 
   const deletePresupuesto = async(req, res) =>{
     try {
+      if(!req.params.id){
+        return res.status(400).send('No envio el id')
+      }
       const presupuestodelete = await db.presupuesto.update({
           isDelete: true
     },{
       where: {
-        id: req.params.id
+        idP: req.params.id
       }
     });
     if (presupuestodelete){
         res.status(200).send({
-          message: "presupuesto baja en el backend"
+          message: "presupuesto eliminado"
       });
     }
   } catch (error) {
     console.log(error);
-    res.status(401).send({
-      message: "Error al elimiar el usuario " + error.message
+    res.status(500).send({
+      message: "Error al eliminar el usuario " + error.message
     });
   }
   };   
@@ -167,11 +189,52 @@ const presupuesto_by_idTarea = async(req,res) => {
       return res.status(500).json({status:"Server Error: " + error});
   }
   };
+  const update_parcial_Presupuesto= async(req, res) =>{
+    try {
+      const {id,detalle_tecnico,cantidad,costo,mes} = req.body;
+      if (!id){ 
+        res.status(400).send({message:'no envió el id'});
+      }
+    if (!detalle_tecnico){ 
+      res.status(400).send({message:'no envió el detalle técnico'});
+    }
+    if (!cantidad){ 
+      res.status(400).send({message:'no envió la cantidad'});
+    }
+    if (!costo){ 
+      res.status(400).send({message:'no envió el costo unitario'});
+    }
+    if (!mes){ 
+      res.status(400).send({message:'no envió el id del mes'});
+    }
+      const updatePresupuesto = await db.presupuesto.update({
+        cantidad: cantidad,
+        costounitario: costo,
+        total:parseFloat(cantidad)* parseFloat(costo),
+        idMes:mes,
+        detalle_tecnico:detalle_tecnico
+      }, {
+          where: {
+              idP: id
+          }
+      });
+      if (updatePresupuesto) {
+          res.status(200).send({
+              message: "Resultado actualizado con éxito",
+              resultado : updatePresupuesto
+          });
+      }
+  } catch (error) {
+      console.log(error);
+      return res.status(500).json({status:"Server Error: " + error});
+  }
+  };
 
   module.exports = {
    presupuesto_by_idTarea,
    allPresupuesto,
    newPresupuesto,
    updatePresupuesto,
-   deletePresupuesto
+   deletePresupuesto,
+   update_parcial_Presupuesto
   }
