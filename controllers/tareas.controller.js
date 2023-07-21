@@ -52,8 +52,7 @@ const newTarea = async (req, res) => {
     }
     let cantidadTareas = await db.tarea.count({
       where: {
-        idActividad: actividad.id,
-        isDelete: false
+        idActividad: actividad.id
       }
     })
     cantidadTareas = cantidadTareas + 1;

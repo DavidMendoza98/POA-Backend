@@ -34,8 +34,7 @@ const newActividad = async (req, res) => {
         let cantidadActividades = await db.actividad.count({
             where: {
               idPoa: poa.id,
-              idDepto:poaDepto.idDepto,
-              isDelete : false
+              idDepto:poaDepto.idDepto
             }
           })
           cantidadActividades = cantidadActividades + 1;
