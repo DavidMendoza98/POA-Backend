@@ -13,6 +13,8 @@ module.exports = function(app) {
   app.get("/tarea/prueba/:nombre", controller.probando_like)
   app.get("/tarea/get_all", controller.AllTareas);
   app.get("/tarea/eliminar/:id",controller.eliminarTarea);
+  app.get("/tarea/aprobar/:id",controller.setAprobadaTarea);
+  app.get("/tarea/rechazar/:id",controller.setRechazadaTarea);
   app.post("/tarea/crear",controller.newTarea);
   app.put("/tarea/actualizar",controller.updateTarea);
   app.put("/tarea/actualizar_nombre",controller.updateNombreTarea);

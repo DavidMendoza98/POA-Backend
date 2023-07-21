@@ -160,7 +160,7 @@ const getDataofActividadForRevision = async(req,res) =>{
             })
 
             const TareasConPresupuesto = await db.tarea.findAll({
-                attributes:['id'],
+                //attributes:['id'],
                 where:{
                     isDelete : false,
                     idActividad : req.params.idActividad,
@@ -169,17 +169,23 @@ const getDataofActividadForRevision = async(req,res) =>{
                 }
             })
 
-            const idsTareasConPresupuesto = TareasConPresupuesto.map(item => item.id);
+            //const idsTareasConPresupuesto = TareasConPresupuesto.map(item => item.id);
             
-            for (const j of idsTareasConPresupuesto) {
-                const presupuesto = await db.presupuesto.findOne({
+            for (const j of TareasConPresupuesto) {
+                const presupuesto = await db.presupuesto.findAll({
                     where:{
                         isDelete : false,
-                        idtarea : j
-                    },include:[{model:db.tarea},{model:db.grupogasto},{model: db.objetogasto},{model:db.unidadmedida},{model:db.fuente}]
+                        idtarea : j.id
+                    },include:[{model:db.tarea},{model:db.grupogasto},{model: db.objetogasto},{model:db.unidadmedida},{model:db.fuente},{model:db.tareas_historico}]
                 })
-
-                TareasConPresupuestoArray.push(presupuesto);
+                const total = presupuesto.reduce((acumulador, objeto) => {
+                    return acumulador + parseFloat(objeto.total);
+                  }, 0);
+                TareasConPresupuestoArray.push({
+                    tarea: j,
+                    presupuestos:presupuesto,
+                    total:total
+                });
                 
             }
             // filtrando nulos

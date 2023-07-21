@@ -303,7 +303,16 @@ const setEstadoDeActividad = async (req, res) => {
                     })
                   break;
               }
-
+        if(req.body.estado === 'APROBADO'){
+            await db.tarea.update({
+                estado: 'APROBADO'
+              }, {
+                where: {
+                  idActividad: req.body.id,
+                  estado:'REVISION'
+                }
+              });
+        }
         if (temporally) {
             res.status(200).send({
                 message: "Actividad actualizada con exito",

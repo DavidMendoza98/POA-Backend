@@ -132,6 +132,49 @@ const eliminarTarea = async (req, res) => {
     });
   }
 }
+
+const setAprobadaTarea = async (req, res) => {
+  try {
+    const updateTarea = await db.tarea.update({
+      estado: 'APROBADO'
+    }, {
+      where: {
+        id: req.params.id
+      }
+    });
+    if (updateTarea) {
+      res.status(200).send({
+        message: "Tarea Aprobada"
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      message: "Error al aprobar la tarea " + error.message
+    });
+  }
+}
+const setRechazadaTarea = async (req, res) => {
+  try {
+    const updateTarea = await db.tarea.update({
+      estado: 'RECHAZADO'
+    }, {
+      where: {
+        id: req.params.id
+      }
+    });
+    if (updateTarea) {
+      res.status(200).send({
+        message: "Tarea Aprobada"
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      message: "Error al aprobar la tarea " + error.message
+    });
+  }
+}
 const updateTarea = async (req, res) => {
   try {
     const tareas = await db.tarea.findByPk(req.body.id);
@@ -478,6 +521,8 @@ module.exports = {
   updateNombreTarea,
   eliminarTarea,
   newTarea,
+  setAprobadaTarea,
+  setRechazadaTarea,
   probando_like,
   AllTarea_by_idActividad,
   AllTarea_by_idActividad_presupuesto,
