@@ -552,6 +552,7 @@ const get_all_data_poa_depto = async (req, res) => {
     // obtener datos generales de dinero
     const totalAsignado = await db.techo_depto.sum('monto',{
       where:{
+        isDelete:false,
         idPoaDepto:id
       }
     })

@@ -25,4 +25,7 @@ module.exports = function(app) {
   app.get("/tarea/suma_fuente12/:idPoa", controller.sumaPresupuestos_Fuente12)
   app.get("/tarea/suma_fuente12B/:idPoa", controller.sumaPresupuestos_Fuente12B)
   app.get("/tarea/suma_11/:id", controller.suma11)
+
+  app.post("/tarea/set_responsable",controller.setResponsable);
+  app.get("/tarea/delete_responsable/:idEmpleado/:idTarea",controller.eliminarResponsable);
 }

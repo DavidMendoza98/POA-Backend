@@ -505,15 +505,62 @@ const AllTarea_by_idActividad_presupuesto = async (req, res) => {
     })
     res.status(200).json(allTarea);
   } catch (error) {
-    res.status(400).json({
+    res.status(500).json({
       message: 'error al ingresar' + error
     })
   }
 };
+const setResponsable = async (req,res)=>{
+  try {
+    const {responsable} = req.body;
+    const responsable_ = JSON.parse(responsable);
+
+    const encargado = await db.tarea_encargado.create(
+      {
+        idEmpleado: responsable_.id,
+        idActividad: responsable_.idActividad,
+        idTarea: responsable_.idTarea
+      }
+    )
+    const empleado = await db.empleado.findByPk(responsable_.id)
+
+    return res.status(200).send(empleado);
+  } catch (error) {
+    res.status(500).json({
+      message: 'error al ingresar' + error
+    })
+  }
+}
+const eliminarResponsable = async (req, res) => {
+  try {
+    const {idEmpleado,idTarea} = req.params;
+    const updateResponsable = await db.tarea_encargado.update({
+      isDelete: true
+    }, {
+      where: {
+        idEmpleado: idEmpleado,
+        idTarea:idTarea
+      }
+    });
+    if (updateResponsable) {
+      res.status(200).send({
+        message: "Encargado de la tarea eliminado"
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      message: "Error al eliminar el encargado de la tarea " + error.message
+    });
+  }
+}
+
 
 
 
 module.exports = {
+  setResponsable,
+  eliminarResponsable,
   AllTareas,
   AllTareas_by_id,
   updateTarea,

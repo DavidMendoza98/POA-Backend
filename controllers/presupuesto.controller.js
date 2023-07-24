@@ -98,7 +98,7 @@ const presupuesto_by_idTarea = async(req,res) => {
 
       const objeto = await db.objetogasto.findByPk(i.historico.objetogasto.id)
       const total = parseFloat(i.cantidad) * parseFloat(i.costo);
-      await db.presupuesto.create({
+      const presupuesto2 = await db.presupuesto.create({
         recurso:i.historico.nombre,
         detalle_tecnico:i.detalle_tecnico,
         cantidad: i.cantidad,
@@ -112,6 +112,9 @@ const presupuesto_by_idTarea = async(req,res) => {
         idunidad: parseInt(i.unidad),
         idHistorico:i.historico.id
       })
+      const objeto_completo = await db.presupuesto.findByPk(presupuesto2.idP,{
+        include:[{model:db.objetogasto},{model:db.fuente}]
+      })
 
       await db.tarea.update({
         isPresupuesto:true
@@ -120,9 +123,9 @@ const presupuesto_by_idTarea = async(req,res) => {
           id:id
       }
     })
-      res.status(200).json({
-        message: 'Recurso creado con éxito'
-      })
+
+
+      res.status(200).send(objeto_completo)
   
     } catch (error) {
       res.status(500).json({
