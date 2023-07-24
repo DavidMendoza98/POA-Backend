@@ -436,6 +436,144 @@ const get_all_UE = async (req, res) => {
       return res.status(500).json({ status: "Server Error: " + error });
   }
 }
+const get_all_data_poa_depto = async (req, res) => {
+  try {
+    const {id} = req.params;
+    if(!id){
+      return res.status(400).send('No envió el id del poa de departamento a mostrar')
+    }
+
+    const poaDepto = await db.poa_depto.findByPk(id,{
+      where:{
+        isDelete:false
+      },include:[{model:db.depto},{model:db.poa}]
+    });
+
+    if(!poaDepto){
+      return res.status(404).send('No se encontro ese poa de departamento')
+    }
+
+    //obtener todas las actividades
+    const actividades = await db.actividad.findAll(
+      {
+        where:{
+          isDelete:false,
+          estado:'APROBADO',
+          idPoaDepto:id
+        }
+      }
+    );
+
+    const resumen = []; // juntara todas las actividades, con sus indicadores (incluidas sus planificaciones), sus tareas (incluidos sus presupuestos y responsables) y sus responsables
+    // for necesario para recorrer cada actividad y agregarle todos sus elementos antes mencionados
+    let presupuestoUsado  = 0;
+    for (const i of actividades) {
+      // primero obtener los indicadores de esa actividad
+      let indicadores = [];
+      let lista_indicadores = await db.indicadoresPoa.findAll({
+        where:{
+          isDelete:false,
+          idActividad:i.id
+        }
+      })
+      // al tener los indicadores se debe obtener las planificaciones de esos indicadores
+      for (const j of lista_indicadores) {
+        let planificaciones = await db.planificacion.findAll({
+          where:{
+            isDelete:false,
+            idIndicador:j.id
+          },include:[{model:db.mes}]
+        })
+        indicadores.push({
+          indicador:j,
+          planificaciones: planificaciones
+        })
+      }
+
+      // luego se obtiene las tareas de esa actividad
+      let tareas = [];
+      let lista_tareas = await db.tarea.findAll({
+        where:{
+          isDelete:false,
+          idActividad:i.id
+        }
+      })
+      // al obtener las tareas se necesita que vengan con los recursos necesarios de la misma
+      for (const k of lista_tareas) {
+        let presupuestos = await db.presupuesto.findAll({
+          where:{
+            isDelete:false,
+            idtarea:k.id
+          },include:[{model:db.fuente},{model:db.grupogasto},{model:db.objetogasto},{model:db.unidadmedida},{model:db.mes}]
+        })
+
+        let suma_presupuesto_1_tarea = await db.presupuesto.sum('total',{
+          where:{
+            isDelete:false,
+            idtarea:k.id
+          }
+        })
+        if(suma_presupuesto_1_tarea === null){
+          suma_presupuesto_1_tarea = 0;
+        }
+        presupuestoUsado = presupuestoUsado + parseFloat(suma_presupuesto_1_tarea);
+
+        let encargadosTareas = await db.tarea_encargado.findAll({
+          where:{
+            isDelete:false,
+            idTarea:k.id
+          }, include:[{model:db.empleado}]
+        })
+        tareas.push({
+          tarea:k,
+          presupuestos: presupuestos,
+          encargados:encargadosTareas
+        })
+      }
+
+      // se obtienen los encargados de esa actividad
+      let encargados = await db.ACencargados.findAll({
+        where:{
+          isDelete:false,
+          idActividad:id
+        },include:[{model:db.empleado}]
+      })
+
+      // al final se agrega lo necesario por cada actividad en el arreglo que sera enviado al cliente
+      resumen.push(
+        {
+          actividad:i,
+          indicadores:indicadores,
+          tareas:tareas,
+          encargados:encargados
+        }
+      )
+    }
+    // obtener datos generales de dinero
+    const totalAsignado = await db.techo_depto.sum('monto',{
+      where:{
+        idPoaDepto:id
+      }
+    })
+    const estadoPresupuesto = {
+      asignado:totalAsignado,
+      utilizado:presupuestoUsado,
+      disponible:totalAsignado - presupuestoUsado
+    }
+
+    const respuesta = {
+      poaDepto: poaDepto,
+      presupuestario: estadoPresupuesto,
+      actividades: resumen
+    }
+      return res.status(200).json(respuesta);
+  } catch (error) {
+    console.log(error
+      
+      )
+      return res.status(500).json({ status: "Server Error: " + error });
+  }
+}
 
 module.exports = {
     get_all_departamento,
@@ -457,5 +595,7 @@ module.exports = {
     AllTarea_by_depto_poa_Fuente12,
     AllTarea_by_depto_poa_Fuente12B,
     get_all_poa_by_idUE,
-    get_all_UE
+    get_all_UE,
+
+    get_all_data_poa_depto
 }

@@ -332,6 +332,32 @@ const misPOAs = async (req, res) => {
         return res.status(500).json({ status: "Server Error: " + error });
     }
 }
+const getPoaDeptosByIdDepto = async (req, res) => {
+    try {
+        const depto = await db.depto.findByPk(req.params.idDepto);
+        if (!depto) {
+            return res.status(404).send({ message: 'No hay departamento' });
+        }
+
+        poas = await db.poa_depto.findAll(
+            {
+                where:{isDelete: false, idDepto: depto.id},
+                include: [
+                    {
+                      model: db.depto,
+                    },
+                    {
+                      model: db.poa
+                    }
+                  ],
+                order: [['id', 'DESC']]
+            }
+        )
+        return res.status(200).json(poas);
+    } catch (error) {
+        return res.status(500).json({ status: "Server Error: " + error });
+    }
+}
 
 
 // Obetener POA por Unidad Ejecutora
@@ -459,6 +485,7 @@ module.exports = {
     get_poa,
     active_POA,
     misPOAs,
+    getPoaDeptosByIdDepto,
     get_all_actividades_by_idPoa,
     get_all_poas_depto_by_idPoaUE,
     delete_POA,

@@ -29,4 +29,7 @@ module.exports = function(app) {
   app.get("/reportes/fuente12BA/:idUE/:anio",controller.AllTarea_by_depto_poa_Fuente12B);
   app.get("/reportes/get_poas_UE/:idUE",controller.get_all_poa_by_idUE);
   app.get("/reportes/get_all_ue",controller.get_all_UE);
+
+
+  app.get("/reportes/get_all_data_poa_depto/:id",controller.get_all_data_poa_depto);
 };

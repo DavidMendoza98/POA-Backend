@@ -56,7 +56,7 @@ const newTarea = async (req, res) => {
       }
     })
     cantidadTareas = cantidadTareas + 1;
-    const correlativo = actividad.correlativo + cantidadTareas.toString();
+    const correlativo = actividad.correlativo + '-' +cantidadTareas.toString();
     const tareaCreada = await db.tarea.create({
       nombre: req.body.nombre,
       descripcion: ' ',

@@ -26,6 +26,7 @@ module.exports = function (app) {
   app.get("/POA/get/:id", controller.get_poa);
   app.get("/POA/getPoaDeptoById/:id", controller.get_poa_depto_by);
   app.get("/POA/getMisPoas/:idDepto", controller.misPOAs);
+  app.get("/POA/getPoaDeptosByIdDepto/:idDepto", controller.getPoaDeptosByIdDepto);
   app.get("/POA/getAllActivites/:idPoa",controller.get_all_actividades_by_idPoa);
   app.get("/POA/getdataForNewPoa/:idUE",controller.getdataForNewPoa);
 };

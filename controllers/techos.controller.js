@@ -314,6 +314,9 @@ const get_techo_by_id_objeto_gasto = async (req, res) => {
             atributes:['id'],
             where:{
                 isDelete:false,
+                estado: {
+                    [Op.in]:['REVISION','APROBADO']
+                },
                 idActividad: {[Op.in]:  idActividades}
             }
         })
@@ -513,6 +516,9 @@ const get_techos_depto_by_idPoaDepto = async (req, res) => {
             // obtener las tareas
             let idTareas = await db.tarea.findAll({
                 atributes:['id'],
+                estado:{
+                    [Op.in]:['APROBADO','REVISION']
+                },
                 where:{
                     isDelete:false,
                     idActividad: {[Op.in]:  idActividades}
