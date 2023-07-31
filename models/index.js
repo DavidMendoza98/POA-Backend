@@ -17,7 +17,7 @@ const sequelize = new Sequelize(
       idle: config.pool.idle
     },
     operatorsAliases: 0,
-    //logging: false
+    logging: false
   }
 );
 
@@ -765,6 +765,13 @@ db.tarea.hasMany(db.seguimiento_tarea, {
 });
 db.seguimiento_tarea.belongsTo(db.tarea, {
   foreignKey: { name: 'idTarea', allowNull: false }
+});
+
+db.presupuesto.hasMany(db.seguimiento_tarea, {
+  foreignKey: {name : 'idPresupuesto' , allowNull: false }
+});
+db.seguimiento_tarea.belongsTo(db.presupuesto, {
+  foreignKey: { name: 'idPresupuesto', allowNull: false }
 });
 
 db.actividad.hasMany(db.seguimiento_tarea, {

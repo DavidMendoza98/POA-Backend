@@ -32,4 +32,5 @@ module.exports = function(app) {
 
 
   app.get("/reportes/get_all_data_poa_depto/:id",controller.get_all_data_poa_depto);
+  app.post("/reportes/get_all_data_ue_filtrada/",controller.get_all_data_ue_filtrada);
 };

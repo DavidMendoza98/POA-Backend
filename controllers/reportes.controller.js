@@ -561,11 +561,76 @@ const get_all_data_poa_depto = async (req, res) => {
       utilizado:presupuestoUsado,
       disponible:totalAsignado - presupuestoUsado
     }
+    // obtener datos de resumen segun asignado a cada una de las fuentes
+    const fuente11 = await db.techo_depto.sum('techo_depto.monto',{
+      where:{
+        isDelete:false,
+        idPoaDepto:id
+      }, include : [{
+        model:db.techo_ue,
+        where:{
+          idFuente:1
+        }
+      }]
+    })
+    const fuente12 = await db.techo_depto.sum('techo_depto.monto',{
+      where:{
+        isDelete:false,
+        idPoaDepto:id
+      }, include : [{
+        model:db.techo_ue,
+        where:{
+          idFuente:2
+        }
+      }]
+    })
+    const fuente12b = await db.techo_depto.sum('techo_depto.monto',{
+      where:{
+        isDelete:false,
+        idPoaDepto:id
+      }, include : [{
+        model:db.techo_ue,
+        where:{
+          idFuente:3
+        }
+      }]
+    })
+    const fuentes = {
+      fuente11,
+      fuente12,
+      fuente12b
+    }
+    // obtener datos segun lo obtenido a cada uno de los grupos
+    const grupos = {
+      labels:[],
+      montos:[]
+    }
+    const _grupos = await db.techo_depto.findAll({
+      attributes:['idGrupo'],
+      group:['idGrupo'],
+      where:{
+        isDelete:false,
+        idPoaDepto:poaDepto.id
+      }
+    })
+    for (const l of _grupos) {
+      let suma = await db.techo_depto.sum('monto',{
+        where:{
+          idPoaDepto:poaDepto.id,
+          idGrupo:l.idGrupo
+        }
+      })
+      grupos.labels.push('Grupo '+l.idGrupo);
+      grupos.montos.push(suma);
+    }
+    
 
     const respuesta = {
       poaDepto: poaDepto,
       presupuestario: estadoPresupuesto,
-      actividades: resumen
+      actividades: resumen,
+      fuentes,
+      grupos
     }
       return res.status(200).json(respuesta);
   } catch (error) {
@@ -573,6 +638,493 @@ const get_all_data_poa_depto = async (req, res) => {
       
       )
       return res.status(500).json({ status: "Server Error: " + error });
+  }
+}
+const get_all_data_ue_filtrada = async (req,res)=>{
+  try {
+    const {
+      poa_id,
+      trimestre_id,
+      fuente_id,
+      grupo_id
+    } = req.body;
+    // obtener el poa, es el unico que el parametro es requerido obligatoriamente
+    if(!poa_id){
+      return res.status(400).send('Debe enviar un id de poa correcto');
+    }
+
+    const poa = await db.poa.findByPk(poa_id,{
+      where:{
+        isDelete:false
+      },include:[{model:db.institucion},{model:db.ue}]
+    })
+
+    if(!poa) {
+      return res.status(404).send('Poa no encontrado');
+    }
+
+    // obtener datos generales de planificacion
+
+    // todos los departamentos que planificaron ese a;o
+    const deptos = await db.poa_depto.findAll({
+      where:{
+        isDelete:false,
+        idPoaUE:poa_id
+      }, include: [
+          {model:db.depto}]
+    })
+
+    // todas las actividades separadas por su estado
+    const actividades_aprobadas = await db.actividad.count({
+      where:{
+        isDelete:false,
+        estado:'APROBADO',
+        idPoa:poa_id
+      }
+    })
+    const actividades_rechazadas = await db.actividad.count({
+      where:{
+        isDelete:false,
+        estado:'RECHAZADO',
+        idPoa:poa_id
+      }
+    })
+    const actividades_pendientes = await db.actividad.count({
+      where:{
+        isDelete:false,
+        estado:'REVISION',
+        idPoa:poa_id
+      }
+    })
+    const actividades_no_presentadas = await db.actividad.count({
+      where:{
+        isDelete:false,
+        estado:'FORMULACION',
+        idPoa:poa_id
+      }
+    })
+    const actividades_en_reformulacion = await db.actividad.count({
+      where:{
+        isDelete:false,
+        estado:'REFORMULACION',
+        idPoa:poa_id
+      }
+    })
+    const actividades = {
+      actividades_aprobadas,
+      actividades_en_reformulacion,
+      actividades_no_presentadas,
+      actividades_pendientes,
+      actividades_rechazadas,
+      total : actividades_aprobadas + actividades_en_reformulacion + actividades_no_presentadas + actividades_pendientes + actividades_rechazadas
+    }
+
+    // obtener datos presupuestarios segun filtro 
+    // calcular presupuesto programado en los 4 escenarios posibles, sin filtro, con filtro grupo, con filtro de fuente y con ambos filtros
+    let presupuesto_programado = 0;
+    if(grupo_id == 0 && fuente_id == 0){
+      presupuesto_programado = await db.techo_ue.sum('monto',{
+        where:{
+          isDelete:false,
+          idPoa:poa_id
+        }
+      })
+    } else if(grupo_id != 0 && fuente_id == 0){
+      presupuesto_programado = await db.techo_ue.sum('monto',{
+        where:{
+          isDelete:false,
+          idPoa:poa_id,
+          idGrupo:grupo_id
+        }
+      })
+    } else if(grupo_id == 0 && fuente_id != 0){
+      presupuesto_programado = await db.techo_ue.sum('monto',{
+        where:{
+          isDelete:false,
+          idPoa:poa_id,
+          idFuente:fuente_id
+        }
+      })
+    } else {
+      presupuesto_programado = await db.techo_ue.sum('monto',{
+        where:{
+          isDelete:false,
+          idPoa:poa_id,
+          idGrupo:grupo_id,
+          idFuente:fuente_id
+        }
+      })
+    }
+    if(presupuesto_programado === null){presupuesto_programado = 0};
+    
+    // calcular presupuesto asignado en los 4 escenarios posibles, sin filtro, con filtro grupo, con filtro de fuente y con ambos filtros
+    let presupuesto_asignado = 0;
+    if(grupo_id == 0 && fuente_id == 0){
+      presupuesto_asignado = await db.techo_depto.sum('monto',{
+        where:{
+          isDelete:false,
+          idPoa:poa_id
+        }
+      })
+    } else if(grupo_id != 0 && fuente_id == 0){
+      presupuesto_asignado = await db.techo_depto.sum('monto',{
+        where:{
+          isDelete:false,
+          idPoa:poa_id,
+          idGrupo:grupo_id
+        }
+      })
+    } else if(grupo_id == 0 && fuente_id != 0){
+      presupuesto_asignado = await db.techo_depto.sum('techo_depto.monto',{
+        where:{
+          isDelete:false,
+          idPoa:poa_id
+        },include:[{
+          model:db.techo_ue,
+          where:{
+            idFuente:fuente_id
+          }
+        }]
+      })
+    } else {
+      presupuesto_asignado = await db.techo_depto.sum('techo_depto.monto',{
+        where:{
+          isDelete:false,
+          idPoa:poa_id,
+          idGrupo:grupo_id
+        },include:[{
+          model:db.techo_ue,
+          where:{
+            idFuente:fuente_id
+          }
+        }]
+      })
+    }
+    if(presupuesto_asignado === null){presupuesto_asignado = 0};
+
+    // obtener los datos de presupuestos, en base al filtro
+    let presupuesto_planificado = 0;
+    if( parseInt(trimestre_id) === 0){
+      presupuesto_planificado = await db.presupuesto.sum('total',{
+        where:{
+          isDelete:false
+        },include:[
+          { model:db.tarea, 
+            where:{
+                idPoa:poa_id,
+                estado:'APROBADO'
+              },
+            include:
+              {model:db.actividad,
+               where:{ estado:'APROBADO'}
+              }
+          }
+        ]
+      })
+      if(presupuesto_planificado === null){
+        presupuesto_planificado = 0;
+      }
+    } else {
+      presupuesto_planificado = await db.presupuesto.sum('total',{
+        where:{
+          isDelete:false
+        },include:[
+          { model:db.tarea, 
+              where:{
+                idPoa:poa_id,
+                estado:'APROBADO'
+              },
+              include:
+                {model:db.actividad,
+                 where:{ estado:'APROBADO'}
+                }
+          },
+          {model:db.mes,
+          where:{
+            idTrimestre:trimestre_id
+          }}
+        ]
+      })
+      if(presupuesto_planificado === null){
+        presupuesto_planificado = 0;
+      }
+    }
+
+    // obtener los datos de presupuestos ejecutados, en base al filtro
+    let presupuesto_ejecutado = 0;
+    if(parseInt(trimestre_id) === 0){
+      presupuesto_ejecutado = await db.seguimiento_tarea.sum('monto_ejecutado',{
+        where:{
+          isDelete:false
+        },include:[
+          { model:db.tarea, 
+              where:{
+                idPoa:poa_id
+              }
+          }
+        ]
+      })
+      if(presupuesto_ejecutado === null){
+        presupuesto_ejecutado = 0;
+      }
+    } else {
+      presupuesto_ejecutado = await db.seguimiento_tarea.sum('monto_ejecutado',{
+        where:{
+          isDelete:false
+        },include:[
+          { model:db.tarea, 
+              where:{
+                idPoa:poa_id
+              }
+          },
+          {model:db.presupuesto,
+            include:[{
+              model:db.mes,
+              where:{
+                idTrimestre:trimestre_id
+              }
+            }]
+          }
+        ]
+      })
+      if(presupuesto_ejecutado === null){
+        presupuesto_ejecutado = 0;
+      }
+    }
+
+    const presupuestos = {
+      presupuesto_programado,
+      presupuesto_asignado,
+      presupuesto_planificado,
+      presupuesto_ejecutado
+    }
+
+    // datos institucionales, dimensiones y resultados institucionales que se estan cumpliendo
+
+    const cant_dimensiones = await db.actividad.findAll({
+      group: ['resultado.idDimension'],
+      where:{
+        isDelete:false,
+        estado : 'APROBADO',
+        idPoa:poa_id
+      }, include:[{
+        model:db.resultado,
+        attributes: ['idDimension']
+      }]
+       
+    })
+    const cant_resultados = await db.actividad.findAll({
+      group: ['idResultado'],
+      where:{
+        isDelete:false,
+        estado : 'APROBADO',
+        idPoa:poa_id
+      }
+    })
+    const institucional = {
+      cant_resultados : cant_resultados.length,
+      cant_dimensiones : cant_dimensiones.length
+    }
+
+    // datos presupuestarios en base al grupo de gasto
+
+
+    // datos de las planificaciones 
+    const planificaciones_t1 = await db.planificacion.count({
+      where:{
+        isDelete:false
+      }, include:[{
+        model:db.actividad,
+        where:{
+          idPoa:poa_id
+        }
+      },
+    {
+      model:db.mes,
+      where:{
+        idTrimestre:1
+      }
+    }]
+    })
+
+    const planificaciones_t2 = await db.planificacion.count({
+      where:{
+        isDelete:false
+      }, include:[{
+        model:db.actividad,
+        where:{
+          idPoa:poa_id
+        }
+      },
+    {
+      model:db.mes,
+      where:{
+        idTrimestre:2
+      }
+    }]
+    })
+
+    const planificaciones_t3 = await db.planificacion.count({
+      where:{
+        isDelete:false
+      }, include:[{
+        model:db.actividad,
+        where:{
+          idPoa:poa_id
+        }
+      },
+    {
+      model:db.mes,
+      where:{
+        idTrimestre:3
+      }
+    }]
+    })
+    const planificaciones_t4 = await db.planificacion.count({
+      where:{
+        isDelete:false
+      }, include:[{
+        model:db.actividad,
+        where:{
+          idPoa:poa_id
+        }
+      },
+    {
+      model:db.mes,
+      where:{
+        idTrimestre:4
+      }
+    }]
+    })
+
+        // datos de las planificaciones  ejecutadas
+        const planificaciones_ejecutadas_t1 = await db.seguimiento_planificacion.count({
+          where:{
+            isDelete:false
+          }, include:[
+            {
+              model:db.planificacion,
+              include:[
+                {
+                  model:db.actividad,
+                  where:{
+                    idPoa:poa_id
+                  }
+                },
+                {
+                  model:db.mes,
+                  where:{
+                    idTrimestre:1
+                  }
+                }
+              ]
+            }
+          ]
+        })
+    
+        const planificaciones_ejecutadas_t2 = await db.seguimiento_planificacion.count({
+          where:{
+            isDelete:false
+          }, include:[
+            {
+              model:db.planificacion,
+              include:[
+                {
+                  model:db.actividad,
+                  where:{
+                    idPoa:poa_id
+                  }
+                },
+                {
+                  model:db.mes,
+                  where:{
+                    idTrimestre:2
+                  }
+                }
+              ]
+            }
+          ]
+        })
+    
+        const planificaciones_ejecutadas_t3 = await db.seguimiento_planificacion.count({
+          where:{
+            isDelete:false
+          }, include:[
+            {
+              model:db.planificacion,
+              include:[
+                {
+                  model:db.actividad,
+                  where:{
+                    idPoa:poa_id
+                  }
+                },
+                {
+                  model:db.mes,
+                  where:{
+                    idTrimestre:3
+                  }
+                }
+              ]
+            }
+          ]
+        })
+        const planificaciones_ejecutadas_t4 = await db.seguimiento_planificacion.count({
+          where:{
+            isDelete:false
+          }, include:[
+            {
+              model:db.planificacion,
+              include:[
+                {
+                  model:db.actividad,
+                  where:{
+                    idPoa:poa_id
+                  }
+                },
+                {
+                  model:db.mes,
+                  where:{
+                    idTrimestre:4
+                  }
+                }
+              ]
+            }
+          ]
+        })
+    // consolidados de planificaciones
+    const planificaciones = {
+      planificaciones_t1,
+      planificaciones_t2,
+      planificaciones_t3,
+      planificaciones_t4,
+      planificaciones_ejecutadas_t1,
+      planificaciones_ejecutadas_t2,
+      planificaciones_ejecutadas_t3,
+      planificaciones_ejecutadas_t4,
+      total_planificado: planificaciones_t1 + planificaciones_t2 + planificaciones_t3 + planificaciones_t4,
+      total_ejecutado: planificaciones_ejecutadas_t1 + planificaciones_ejecutadas_t2 + planificaciones_ejecutadas_t3 + planificaciones_ejecutadas_t4
+    }
+
+    // presupuestos por grupo del gasto
+    //const grupos = await 
+
+
+
+    const respuesta = {
+      poa,
+      poa_deptos : deptos,
+      actividades,
+      presupuestos,
+      institucional,
+      planificaciones
+
+    }
+    return res.status(200).send(respuesta);
+
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ status: "Server Error: " + error });
   }
 }
 
@@ -598,5 +1150,6 @@ module.exports = {
     get_all_poa_by_idUE,
     get_all_UE,
 
-    get_all_data_poa_depto
+    get_all_data_poa_depto,
+    get_all_data_ue_filtrada
 }
