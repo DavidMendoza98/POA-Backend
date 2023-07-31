@@ -466,7 +466,27 @@ const get_all_data_poa_depto = async (req, res) => {
 
     const resumen = []; // juntara todas las actividades, con sus indicadores (incluidas sus planificaciones), sus tareas (incluidos sus presupuestos y responsables) y sus responsables
     // for necesario para recorrer cada actividad y agregarle todos sus elementos antes mencionados
-    let presupuestoUsado  = 0;
+    const presupuestoUtilizado = await db.presupuesto.sum('total',{
+      include:[
+        { model:db.tarea,
+          include:[{
+            model:db.actividad,
+            where:{
+              idPoaDepto:poaDepto.id
+            }
+          }],
+          where:{
+            estado:'APROBADO'
+          }
+        }
+      ],
+      where:{
+        isDelete:false
+      }
+    })
+    if(presupuestoUtilizado === null){
+      presupuestoUtilizado = 0;
+    }
     for (const i of actividades) {
       // primero obtener los indicadores de esa actividad
       let indicadores = [];
@@ -506,17 +526,7 @@ const get_all_data_poa_depto = async (req, res) => {
             idtarea:k.id
           },include:[{model:db.fuente},{model:db.grupogasto},{model:db.objetogasto},{model:db.unidadmedida},{model:db.mes}]
         })
-
-        let suma_presupuesto_1_tarea = await db.presupuesto.sum('total',{
-          where:{
-            isDelete:false,
-            idtarea:k.id
-          }
-        })
-        if(suma_presupuesto_1_tarea === null){
-          suma_presupuesto_1_tarea = 0;
-        }
-        presupuestoUsado = presupuestoUsado + parseFloat(suma_presupuesto_1_tarea);
+        
 
         let encargadosTareas = await db.tarea_encargado.findAll({
           where:{
@@ -558,8 +568,8 @@ const get_all_data_poa_depto = async (req, res) => {
     })
     const estadoPresupuesto = {
       asignado:totalAsignado,
-      utilizado:presupuestoUsado,
-      disponible:totalAsignado - presupuestoUsado
+      utilizado:presupuestoUtilizado,
+      disponible:totalAsignado - presupuestoUtilizado
     }
     // obtener datos de resumen segun asignado a cada una de las fuentes
     const fuente11 = await db.techo_depto.sum('techo_depto.monto',{
