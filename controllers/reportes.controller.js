@@ -472,11 +472,14 @@ const get_all_data_poa_depto = async (req, res) => {
           include:[{
             model:db.actividad,
             where:{
-              idPoaDepto:poaDepto.id
+              idPoaDepto:poaDepto.id,
+              estado:'APROBADO',
+              isDelete:false
             }
           }],
           where:{
-            estado:'APROBADO'
+            estado:'APROBADO',
+            isDelete:false
           }
         }
       ],
