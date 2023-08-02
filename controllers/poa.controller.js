@@ -119,7 +119,7 @@ const updatePOA = async (req, res) => {
         for (const i of techos) {
             if(i.hasOwnProperty('id')){
                 let techo = await db.techo_ue.findByPk(i.id);
-                if(techo.monto < i.monto){
+                if(true){ //techo.monto < i.monto
                     await db.techo_ue.update(
                         {monto:i.monto},
                         {where:{
