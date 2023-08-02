@@ -323,6 +323,31 @@ const setEstadoDeActividad = async (req, res) => {
         return res.status(500).json({ status: "Server Error: " + error });
     }
 }
+const setUploadIntoSPIDeActividad = async (req, res) => {
+    try {
+        if (!req.body.id) {
+            return res.status(400).json({ message: 'Debe enviar todos los datos' });
+        }
+       
+        const actividad = await db.actividad.findByPk(req.body.id);
+        
+        const temporally = await db.actividad.update(
+            {
+                uploadedIntoSPI: !actividad.uploadedIntoSPI
+            },
+            { where: { id: req.body.id } });
+
+        if (temporally) {
+            res.status(200).send({
+                message: "Actividad actualizada con exito",
+                actividad: temporally
+            });
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ status: "Server Error: " + error });
+    }
+}
 
 module.exports = {
     newActividad,
@@ -331,5 +356,6 @@ module.exports = {
     updateActividad,
     delete_actividad,
     get_all_actividades,
-    setEstadoDeActividad
+    setEstadoDeActividad,
+    setUploadIntoSPIDeActividad
 }

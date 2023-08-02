@@ -33,4 +33,6 @@ module.exports = function(app) {
 
   app.get("/reportes/get_all_data_poa_depto/:id",controller.get_all_data_poa_depto);
   app.post("/reportes/get_all_data_ue_filtrada/",controller.get_all_data_ue_filtrada);
+  app.post("/reportes/get_actividades_filtradas/",controller.get_actividades_filtradas);
+  app.get("/reportes/get_full_actividad_detail/:id",controller.getActividadForReporte);
 };

@@ -29,7 +29,11 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.ENUM('FORMULACION', 'REFORMULACION', 'REVISION', 'APROBADO', 'RECHAZADO',),
             allowNull: false,
         },
-
+        uploadedIntoSPI:{
+            type: Sequelize.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
+        },
         isActive: {
             type: Sequelize.BOOLEAN,
             allowNull: false,

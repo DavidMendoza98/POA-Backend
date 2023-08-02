@@ -466,7 +466,7 @@ const get_all_data_poa_depto = async (req, res) => {
 
     const resumen = []; // juntara todas las actividades, con sus indicadores (incluidas sus planificaciones), sus tareas (incluidos sus presupuestos y responsables) y sus responsables
     // for necesario para recorrer cada actividad y agregarle todos sus elementos antes mencionados
-    const presupuestoUtilizado = await db.presupuesto.sum('total',{
+    let presupuestoUtilizado = await db.presupuesto.sum('total',{
       include:[
         { model:db.tarea,
           include:[{
@@ -1141,6 +1141,240 @@ const get_all_data_ue_filtrada = async (req,res)=>{
   }
 }
 
+const get_actividades_filtradas = async (req,res)=>{
+  try {
+    const {
+      poa_id,
+      dimension_id,
+      departamento_id,
+      objetivo_id,
+      area_id,
+      resultado_id
+    } = req.body;
+    // obtener el poa, es el unico que el parametro es requerido obligatoriamente
+    if(!poa_id){
+      return res.status(400).send('Debe enviar un id de poa correcto');
+    }
+    if(!dimension_id){
+      return res.status(400).send('Debe enviar un id de dimension correcto');
+    }
+    if(!departamento_id){
+      return res.status(400).send('Debe enviar un id de departamento correcto');
+    }
+    if(!objetivo_id){
+      return res.status(400).send('Debe enviar un id de objetivo correcto');
+    }
+    if(!area_id){
+      return res.status(400).send('Debe enviar un id de area correcto');
+    }
+    if(!resultado_id){
+      return res.status(400).send('Debe enviar un id de resultado correcto');
+    }
+
+    const poa = await db.poa.findByPk(poa_id,{
+      where:{
+        isDelete:false
+      },include:[{model:db.institucion},{model:db.ue}]
+    })
+
+    if(!poa) {
+      return res.status(404).send('Poa no encontrado');
+    }
+    // Inicializar la variable que sera devuelta como resultado
+    let actividades = []
+    // Evaluar en los escenarios posibles
+    if(dimension_id == 0 && departamento_id == 0){ // sin filtros
+      actividades = await  get_actividades_sin_filtros(poa.id);
+    } else if(dimension_id != 0 && departamento_id == 0){ // unicamente dimension
+      actividades = await get_actividades_filtro_dimension(poa.id,dimension_id);
+    } else if (dimension_id == 0 && departamento_id != 0 ){ // unicamente departamento
+      actividades = await get_actividades_filtro_departamento(poa.id,departamento_id);
+    } else {
+      actividades = await get_actividades_filtro_dimension_y_departamento(poa.id,dimension_id,departamento_id);
+    }
+    actividades = await filtrar_actividad_dimension_completo(actividades);
+    return res.status(200).send(actividades);
+  } catch (error) {
+    console.log(error)
+    return res.status(500).send(error)
+  }
+}
+
+async function get_actividades_sin_filtros(idPoa) {
+  return await db.actividad.findAll({
+    where:{
+      isDelete:false,
+      estado:'APROBADO',
+      idPoa:idPoa
+    },include:{model:db.resultado}
+  })
+} 
+async function get_actividades_filtro_dimension(idPoa,idDimension) {
+  return await db.actividad.findAll({
+    where:{
+      isDelete:false,
+      estado:'APROBADO',
+      idPoa:idPoa
+    },
+    include:[{
+      model:db.resultado,
+      include:[{
+        model:db.dimension
+      }],
+      where:{
+        idDimension:idDimension
+      }
+    }]
+  })
+}   
+async function get_actividades_filtro_departamento(idPoa,idDepartamento) {
+  return await db.actividad.findAll({
+    where:{
+      isDelete:false,
+      estado:'APROBADO',
+      idPoa:idPoa,
+      idDepto:idDepartamento
+    },include:{model:db.resultado}
+  })
+} 
+async function get_actividades_filtro_dimension_y_departamento(idPoa,idDimension, idDepto) {
+  return await db.actividad.findAll({
+    where:{
+      isDelete:false,
+      estado:'APROBADO',
+      idPoa:idPoa,
+      idDepto:idDepto
+    },
+    include:[{
+      model:db.resultado,
+      include:[{
+        model:db.dimension
+      }],
+      where:{
+        idDimension:idDimension
+      }
+    }]
+  })
+} 
+
+async function filtrar_actividad_dimension_completo(actividades,idObjetivo,idArea,idResultado){
+  if(idObjetivo && idObjetivo !== 0){
+    actividades = actividades.filter(item=>item.resultado.idObjetivos == idObjetivo)
+  } else if(idArea && idArea !== 0){
+    actividades = actividades.filter(item=>item.resultado.idArea == idArea)
+  }  else if(idResultado && idResultado !== 0){
+    actividades = actividades.filter(item=>item.idResultado == idResultado)
+  }
+  return actividades;
+}
+
+const getActividadForReporte = async (req,res)=>{
+  try {
+    const {id} = req.params
+    if(!id){
+      return res.status(400).send('Debe enviar un id de poa correcto');
+    }
+    const actividades = await getFullActividad(id);
+    return res.status(200).send(actividades);
+  } catch (error) {
+    console.log(error)
+    return res.status(500).send(error)
+  }
+}
+async function getFullActividad(id){
+  try {
+    
+    const actividad = await db.actividad.findByPk(id,{
+      where:{
+        isDelete:false
+      },include:[
+          {model:db.resultado,
+            include:[{model:db.objetivos},{model:db.areas},{model:db.dimension}]},
+          {model:db.poa},
+          {model:db.depto},
+          {model:db.tipo_actividad},
+          {model:db.categoria},
+        ]
+    });
+    
+    // Obtenes sus indicadores y las planificaciones de esos indicadores
+    const indicadores = []
+    const lista_indicadores = await db.indicadoresPoa.findAll({
+      where:{
+        isDelete:false,
+        idActividad : actividad.id
+      }
+    })
+
+    for (const i of lista_indicadores) {
+      let planificaciones = await db.planificacion.findAll({
+        where:{
+          isDelete:false,
+          idIndicador:i.id
+        }
+      })
+      indicadores.push({
+        indicador:i,
+        planificaciones
+      })
+    }
+
+    // Obtener sus responsables
+    let responsables = await db.ACencargados.findAll({
+      where:{
+        isDelete:false,
+        idActividad:actividad.id
+      }, include:[{
+        model:db.empleado,
+        where:{
+          isDelete:false
+        }
+      }]
+    })
+    if(responsables === undefined) responsables = [];
+
+    // Obtener sus tareas y los recursos de esas tareas
+    const tareas = []
+    const all_tareas = await db.tarea.findAll({
+      where:{
+        isDelete:false,
+        estado:'APROBADO',
+        idActividad:actividad.id
+      }
+    })
+
+    for (const o of all_tareas) {
+      let recursos = await db.presupuesto.findAll({
+        where:{
+          isDelete:false,
+          idtarea:o.id
+        }, include:[
+                {model:db.grupogasto},
+                {model:db.objetogasto},
+                {model:db.fuente},
+                {model:db.unidadmedida},
+                {model:db.mes}
+            ]
+      })
+      tareas.push({
+        tarea:o,
+        recursos
+      })
+    }
+    return {
+      actividad,
+      indicadores,
+      responsables,
+      tareas
+    }
+
+    
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+
 module.exports = {
     get_all_departamento,
     get_all_poa_by_idDepto,
@@ -1164,5 +1398,7 @@ module.exports = {
     get_all_UE,
 
     get_all_data_poa_depto,
-    get_all_data_ue_filtrada
+    get_all_data_ue_filtrada,
+    get_actividades_filtradas,
+    getActividadForReporte
 }

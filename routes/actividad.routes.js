@@ -14,6 +14,7 @@ module.exports = function(app) {
   app.put("/actividad/editar",controller.updateActividad);
   app.post("/actividad/crear",controller.newActividad);
   app.put("/actividad/setEstadoDeActividad",controller.setEstadoDeActividad)
+  app.put("/actividad/setUploadIntoSPIDeActividad",controller.setUploadIntoSPIDeActividad)
 
   app.get("/actividad/get_all_by_idPoa/:idPoa", controller.get_all_actividad_by_idPoa);
 
