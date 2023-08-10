@@ -1,5 +1,7 @@
 const db = require("../models");
 const { Op, DataTypes, Model, and, or } = require("sequelize");
+const ExcelJS = require('exceljs');
+const fs = require('node:fs/promises');
 
 const get_all_departamento = async (req, res) => {
     try {
@@ -436,6 +438,8 @@ const get_all_UE = async (req, res) => {
       return res.status(500).json({ status: "Server Error: " + error });
   }
 }
+
+
 const get_all_data_poa_depto = async (req, res) => {
   try {
     const {id} = req.params;
@@ -825,11 +829,15 @@ const get_all_data_ue_filtrada = async (req,res)=>{
           { model:db.tarea, 
             where:{
                 idPoa:poa_id,
-                estado:'APROBADO'
+                estado:'APROBADO',
+                isDelete:False
               },
             include:
               {model:db.actividad,
-               where:{ estado:'APROBADO'}
+               where:{
+                 estado:'APROBADO',
+                 isDelete:false
+                }
               }
           }
         ]
@@ -1143,6 +1151,7 @@ const get_all_data_ue_filtrada = async (req,res)=>{
 
 const get_actividades_filtradas = async (req,res)=>{
   try {
+    
     const {
       poa_id,
       dimension_id,
@@ -1193,6 +1202,20 @@ const get_actividades_filtradas = async (req,res)=>{
       actividades = await get_actividades_filtro_dimension_y_departamento(poa.id,dimension_id,departamento_id);
     }
     actividades = await filtrar_actividad_dimension_completo(actividades);
+    return res.status(200).send(actividades);
+  } catch (error) {
+    console.log(error)
+    return res.status(500).send(error)
+  }
+}
+
+const getActividadForReporte = async (req,res)=>{
+  try {
+    const {id} = req.params
+    if(!id){
+      return res.status(400).send('Debe enviar un id de poa correcto');
+    }
+    const actividades = await getFullActividad(id);
     return res.status(200).send(actividades);
   } catch (error) {
     console.log(error)
@@ -1268,19 +1291,6 @@ async function filtrar_actividad_dimension_completo(actividades,idObjetivo,idAre
   return actividades;
 }
 
-const getActividadForReporte = async (req,res)=>{
-  try {
-    const {id} = req.params
-    if(!id){
-      return res.status(400).send('Debe enviar un id de poa correcto');
-    }
-    const actividades = await getFullActividad(id);
-    return res.status(200).send(actividades);
-  } catch (error) {
-    console.log(error)
-    return res.status(500).send(error)
-  }
-}
 async function getFullActividad(id){
   try {
     
@@ -1373,6 +1383,57 @@ async function getFullActividad(id){
     console.log(error)
   }
 }
+const descargarConsolidado = async (req,res) =>{
+  //await createExcelFile();
+  return res.download('consolidado.xlsx');
+}
+async function createExcelFile(){
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'BSCS-POA-CURLP';
+  const sheet_actividades= workbook.addWorksheet('Actividades');
+  sheet_actividades.columns = [
+    { header: 'CORRELATIVO', key: 'correlativo' },
+    { header: 'AÑO', key: 'year' },
+    { header: 'ACTIVIDAD', key: 'actividad' },
+    { header: 'DESCRIPCIÓN', key: 'descripcion' },
+    { header: 'RESULTADO DE ACTIVIDAD', key: 'resultado_actividad' },
+    { header: 'POBLACIÓN OBJETIVO', key: 'poblacion_objetivo' },
+    { header: 'MEDIO DE VERIFICACIÓN', key: 'medio_verificacion' },
+    { header: 'DEPARTAMENTO', key: 'departamento' },
+    { header: 'TIPO DE GESTION', key: 'tipo_de_gestion'},
+    { header: 'CATEGORÍA', key: 'categoria'},
+    { header: 'DIMENSIÓN', key: 'dimension'},
+    { header: 'OBJETIVO', key: 'objetivo'},
+    { header: 'ÁREA', key: 'area'},
+    { header: 'RESULTADO', key: 'resultado'}
+   ];
+   sheet_actividades.addRow(
+        {
+          correlativo:'----',
+          year: '----', 
+          actividad: '----',
+          descripcion:'----',
+          resultado_actividad:'----',
+          poblacion_objetivo:'----',
+          medio_verificacion:'----',
+          departamento:'----',
+          tipo_de_gestion:'----',
+          categoria:'----',
+          dimension:'----',
+          objetivo:'----',
+          area:'----',
+          resultado:'----'
+        }
+      )
+
+
+  const sheet_indicadores = workbook.addWorksheet('Indicadores');
+  const sheet_planificaciones = workbook.addWorksheet('Planificaciones');
+  const sheet_tareas = workbook.addWorksheet('Tareas');
+  const sheet_recursos = workbook.addWorksheet('Recursos');
+
+  await workbook.xlsx.writeFile('consolidado'+'.xlsx');  
+}
 
 
 module.exports = {
@@ -1400,5 +1461,6 @@ module.exports = {
     get_all_data_poa_depto,
     get_all_data_ue_filtrada,
     get_actividades_filtradas,
-    getActividadForReporte
+    getActividadForReporte,
+    descargarConsolidado
 }
