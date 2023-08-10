@@ -830,7 +830,7 @@ const get_all_data_ue_filtrada = async (req,res)=>{
             where:{
                 idPoa:poa_id,
                 estado:'APROBADO',
-                isDelete:False
+                isDelete:false
               },
             include:
               {model:db.actividad,
