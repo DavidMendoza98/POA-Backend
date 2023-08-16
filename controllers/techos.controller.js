@@ -29,18 +29,30 @@ const delete_techo_ue = async (req, res) => {
         if (!techo) {
             return res.status(404).send({ "message": "No se encuentra registrado ese techo" });
         }
-        await db.techo_ue.update(
-            {
-                isDelete: true
-            },
-            {
-                where: {
-                    id: req.body.id
-                }
+        const posibles_techos_deptos = await db.techo_depto.findAll({
+            where:{
+                isDelete:false,
+                idTechoUE:techo.id
             }
-        )
+        })
+        if(!posibles_techos_deptos){
+            await db.techo_ue.update(
+                {
+                    isDelete: true
+                },
+                {
+                    where: {
+                        id: req.body.id
+                    }
+                }
+            )
+            return res.status(200).send({ "message": "Techo eliminado correctamente" });
+        } else {
+            return res.status(403).send({ "message": "No se puede eliminar el techo porque hay departamentos ya asignados" });
+        }
+        
 
-        return res.status(200).send({ "message": "Techo eliminado correctamente" });
+        
     } catch (err) {
         return res.status(500).send({ "message": 'Error al eliminar el techo presupuestario de la unidad ejecutora ', "error": err });
     }

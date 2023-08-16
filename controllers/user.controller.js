@@ -69,16 +69,26 @@ const allUser = async (req, res) => {
     const allusers = await db.user.findAll({
       where: {
         isDelete: false,
+        idRol:{
+          [Op.not]:1
+        }
       },
       attributes: {
         exclude: ['password']
       },
       include: [{
-        model: db.role,
+        model: db.role
       }, {
-        model: db.empleado, include: [{ model: db.ue, include:[{
-          model:db.institucion
-        }] }]
+        model: db.empleado, 
+        include: [{ 
+          model: db.ue, 
+          include:[{
+            model:db.institucion
+          }] 
+        }],
+        where:{
+          idUnidadEjecutora:req.usuario.idUE
+        }
       }]
     })
     return res.status(200).send( allusers );

@@ -12,7 +12,8 @@ const getEmpleados = async (req,res) =>{
         const empleados_list_ids = await db.empleado_depto.findAll(
             {
                 where:{
-                    idDepto: req.params.id
+                    idDepto: req.params.id,
+                    idUnidadEjecutora:req.usuario.idUE
                 }
             }
         )
@@ -41,7 +42,7 @@ const new_depto = async (req,res) =>{
             siglas: req.body.siglas,
             estructura: req.body.estructura,
             tipo:req.body.tipo,
-            idUnidadEjecutora:req.body.idUnidadEjecutora
+            idUnidadEjecutora:req.usuario.idUE
         });
         return res.status(200).json({status:"Ok"});
     } catch(error){
@@ -54,7 +55,7 @@ const get_all_deptos = async (req,res) =>{
     try{
         const all_deptos = await db.depto.findAll({
             where:{isDelete:false,
-                idUnidadEjecutora:req.params.idUnidadEjecutora}
+                idUnidadEjecutora:req.usuario.idUE}
         });
         if(!all_deptos){
             return res.status(404).send({message:'no hay ningun elemento'});

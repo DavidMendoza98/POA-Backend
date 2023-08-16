@@ -17,7 +17,7 @@ const new_Empleado = async (req,res) =>{
             telefono : req.body.telefono,
             fechaNacimiento : req.body.fechaNacimiento,
             sexo: req.body.sexo,
-            idUnidadEjecutora: req.body.idUnidadEjecutora
+            idUnidadEjecutora: req.usuario.idUE
         });
         const deptos = JSON.parse(req.body.list_deptos);
         for (const i of deptos) {
